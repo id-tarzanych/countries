@@ -337,7 +337,7 @@ function countries_field_info() {
       'label' => t('Country'),
       'description' => t('This field stores a country reference in the database.'),
       'settings' => array(),
-      'default_widget' => 'country_select',
+      'default_widget' => 'options_select',
       'default_formatter' => 'country_default',
     ),
   );
@@ -504,22 +504,6 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
 }
 
 /**
- * Implement hook_field_widget_info().
- */
-function countries_field_widget_info() {
-  return array(
-    'country_select' => array(
-      'label' => t('Country select list'),
-      'field types' => array('country'),
-      'settings' => array('continents' => array(), 'enabled' => COUNTRIES_ENABLED, 'size' => 5),
-      'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
-      ),
-    ),
-  );
-}
-
-/**
  * Implements hook_field_widget_info_alter().
  */
 function countries_field_widget_info_alter(&$info) {
@@ -569,13 +553,6 @@ function countries_field_settings_form($field, $instance, $has_data) {
     '#options' => countries_get_continents(),
     '#description' => t('If no continents are selected, this filter will not be used.'),
     '#element_validate' => array('_countries_element_array_filter'),
-  );
-
-  $form['size'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Size'),
-    '#default_value' => isset($settings['size']) ? $settings['size'] : '',
-    '#element_validate' => array('_element_validate_integer_positive'),
   );
 
   return $form;
