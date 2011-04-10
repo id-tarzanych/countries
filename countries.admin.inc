@@ -227,7 +227,7 @@ function countries_admin_form_validate($form, &$form_state) {
       else {
         $form_state['values'][$key] = trim($form_state['values'][$key]);
       }
-      switch($key) {
+      switch ($key) {
         case 'name':
           break;
         case 'iso2':
@@ -420,7 +420,7 @@ function countries_admin_import_form_submit($form, &$form_state) {
   if (!empty($form_state['updates'])) {
     $changes = array();
     foreach (array_filter($form_state['values']['updates']) as $change) {
-      list($iso2,$key) = explode ('-', $change);
+      list ($iso2, $key) = explode ('-', $change);
       $changes[$iso2][$key] = $form_state['updates'][$iso2][$key]['new'];
     }
     foreach ($changes as $iso2 => $values) {

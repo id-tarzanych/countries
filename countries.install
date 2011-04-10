@@ -97,7 +97,7 @@ function countries_uninstall() {
 function countries_import_csv() {
   $t = get_t();
   $countries = array();
-  $handle = fopen(dirname(__FILE__) ."/countries.csv", "r");
+  $handle = fopen(dirname(__FILE__) . '/countries.csv', 'r');
   $headers = fgetcsv($handle, 1024, ",");
   while (($row = fgetcsv($handle, 1024, ",")) !== FALSE) {
     $row[0] = trim($row[0]);  // iso2
@@ -121,7 +121,7 @@ function countries_import_csv() {
   }
   fclose($handle);
   include_once DRUPAL_ROOT . '/includes/iso.inc';
-  foreach(_country_get_predefined_list() as $code => $name) {
+  foreach (_country_get_predefined_list() as $code => $name) {
     if (array_key_exists($code, $countries)) {
       $countries[$code]['name'] = $name;
       $countries[$code]['enabled'] = 1;

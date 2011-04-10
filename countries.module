@@ -312,7 +312,7 @@ function countries_get_countries($property = 'all') {
       ->execute()
       ->fetchCol();
     $_countríes = countries_load_multiple($cids);
-    foreach($_countríes as $country) {
+    foreach ($_countríes as $country) {
       // TODO: I18n
       // countries_localize_country($country);
       $countries[$country->iso2] = $country;
@@ -473,7 +473,7 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
         break;
 
       default:
-        list(,$icon_module,$icon_type,$icon_set_name) = explode('_', $display['type'], 4);
+        list(, $icon_module, $icon_type, $icon_set_name) = explode('_', $display['type'], 4);
         if (module_exists($icon_module)) {
           // countryicons formatters
           switch ($icon_module) {
@@ -538,7 +538,9 @@ function countries_options_list($field) {
     'enabled' => $field['settings']['enabled'],
   );
 
-  if (!isset($field['#filters'])) { $field['#filters'] = $filters; }
+  if (!isset($field['#filters'])) {
+    $field['#filters'] = $filters;
+  }
   $field = $function($field);
   return $field['#options'];
 }
@@ -575,7 +577,7 @@ function countries_field_settings_form($field, $instance, $has_data) {
     '#default_value' => isset($settings['size']) ? $settings['size'] : '',
     '#element_validate' => array('_element_validate_integer_positive'),
   );
-  
+
   return $form;
 }
 
@@ -595,7 +597,7 @@ function _countries_element_array_filter_process($element = array(), &$form_stat
     _countries_element_array_filter_process($element, $form_state[$key]);
     return;
   }
-  
+
   $form_state = array_filter(drupal_map_assoc($form_state));
 }
 
