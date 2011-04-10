@@ -80,7 +80,7 @@ function countries_menu() {
 /**
  * Menu wildcard loader.
  *
- * See countries_load($cid).
+ * @see countries_load()
  */
 function country_load($iso2) {
   $countries = countries_get_countries();
@@ -149,6 +149,18 @@ function countries_element_info() {
   return $type;
 }
 
+/**
+ * Helper function to determine the value for a country form element.
+ *
+ * @param $element
+ *   The form element whose value is being populated.
+ * @param $input
+ *   The incoming input to populate the form element. If this is FALSE,
+ *   the element's default value should be returned.
+ * @return
+ *   The data that will appear in the $element_state['values'] collection
+ *   for this element. Return nothing to use the default.
+ */
 function form_type_country_value($element, $input = FALSE) {
   if ($input !== FALSE) {
     if (isset($element['#multiple']) && $element['#multiple']) {
@@ -826,6 +838,17 @@ function countries_load_multiple($cids = array(), $conditions = array(), $reset 
   return entity_load('country', $cids, $conditions, $reset);
 }
 
+/**
+ * Load a countries object from the database.
+ *
+ * @param $cid
+ *   The country ID.
+ * @param $reset
+ *   Whether to reset the countries_load_multiple cache.
+ *
+ * @return
+ *   A fully-populated countries object.
+ */
 function countries_load($cid, $reset = FALSE) {
   $countries = countries_load_multiple(array($cid), array(), $reset);
   return reset($countries);
