@@ -312,7 +312,7 @@ function countries_get_countries($property = 'all') {
       ->execute()
       ->fetchCol();
     $_countríes = countries_load_multiple($cids);
-    foreach ($_countríes as $country) {
+    foreach($_countríes as $country) {
       // TODO: I18n
       // countries_localize_country($country);
       $countries[$country->iso2] = $country;
@@ -455,7 +455,7 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
         break;
 
       default:
-        list(, $icon_module, $icon_type, $icon_set_name) = explode('_', $display['type'], 4);
+        list(,$icon_module,$icon_type,$icon_set_name) = explode('_', $display['type'], 4);
         if (module_exists($icon_module)) {
           // countryicons formatters
           switch ($icon_module) {
@@ -548,54 +548,9 @@ function _countries_checkbox_filter($element, &$form_state) {
 }
 
 /**
- * Implements hook_field_widget_form().
+ * Custom theming function to convert the ISO numeric-3 codes to a '0' padded
+ * string.
  */
-function countries_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $default_value = array();
-  if (!is_array($items)) {
-    $items = array_filter(array($items));
-  }
-  foreach ($items as $item) {
-    $default_value []= $item['iso2'];
-  }
-  $settings = $instance['widget']['settings'];
-  $filters = array(
-    'continents' => array_filter($settings['continents']),
-    'enabled' => $settings['enabled'],
-  );
-  $element += array(
-    '#type' => 'country',
-    '#default_value' => $default_value,
-    '#multiple' => $field['cardinality'] != 1,
-    '#cardinality' => $field['cardinality'],
-    '#size' => $field['cardinality'] != 1 ? $settings['size'] : 1,
-    '#filters' => $filters,
-    '#element_validate' => array('countries_country_field_validate', 'countries_country_element_validate')
-  );
-
-  return $element;
-}
-
-/**
- * We need to transform the field values here to complete the
- * requirements for the field custom handling of multiple values.
- *
- * This converts the array('AU' => 'AU', 'US' => 'US') to
- * array(0 => array('iso2' => 'AU'), 1 => array('iso2' => 'US')).
- *
- * @see countries_country_element_validate() for validation.
- */
-function countries_country_field_validate($element, &$form_state) {
-  $values = array();
-  if (!is_array($element['#value'])) {
-    $element['#value'] = array_filter(array($element['#value']));
-  }
-  foreach (array_values($element['#value']) as $value) {
-    $values[] = array('iso2' => $value);
-  }
-  form_set_value($element, $values, $form_state);
-}
-
 function theme_countries_number($variables) {
   if (isset($variables['country']) && !empty($variables['country']->numcode)) {
     return sprintf("%03s", $variables['country']->numcode);
@@ -701,10 +656,9 @@ function countries_feeds_processor_targets_alter_callback($source, $entity, $tar
 
   // Find the field name and country property keys.
   list($entity_type, $bundle_name, $field_name, $property) = explode(':', $target, 4);
-  $instance = field_read_instance($entity_type, $field_name, $bundle_name);
-  $settings = $instance['widget']['settings'];
-  $continents = array_filter((array)$settings['continents']);
   $field = field_read_field($field_name);
+  $settings = $field['settings'];
+  $continents = array_filter((array)$settings['continents']);
 
   $entity->{$field_name} = isset($entity->$field_name) ? $entity->{$field_name} : array();
   foreach ($values as $value) {
