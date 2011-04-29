@@ -336,7 +336,7 @@ function countries_field_info() {
     'country' => array(
       'label' => t('Country'),
       'description' => t('This field stores a country reference in the database.'),
-      'settings' => array(),
+      'settings' => array('continents' => array(), 'enabled' => COUNTRIES_ENABLED, 'size' => 5),
       'default_widget' => 'options_select',
       'default_formatter' => 'country_default',
     ),
@@ -534,30 +534,17 @@ function countries_field_settings_form($field, $instance, $has_data) {
     '#default_value' => isset($settings['continents']) ? $settings['continents'] : array(),
     '#options' => countries_get_continents(),
     '#description' => t('If no continents are selected, this filter will not be used.'),
-    '#element_validate' => array('_countries_element_array_filter'),
+    '#element_validate' => array('_countries_checkbox_filter'),
   );
 
   return $form;
 }
 
 /**
- * Helper function: filter form elements recursive
+ * Helper function to filter empty options from a multi-checkbox field.
  */
-function _countries_element_array_filter($element, &$form_state) {
-  _countries_element_array_filter_process($element['#array_parents'], $form_state['values']);
-}
-
-/**
- * Helper function: invoked by _countries_element_array_filter()
- */
-function _countries_element_array_filter_process($element = array(), &$form_state) {
-  $key = array_shift($element);
-  if (!empty($key)) {
-    _countries_element_array_filter_process($element, $form_state[$key]);
-    return;
-  }
-
-  $form_state = array_filter(drupal_map_assoc($form_state));
+function _countries_checkbox_filter($element, &$form_state) {
+  form_set_value($element, $element['#value'], $form_state);
 }
 
 /**

@@ -71,7 +71,7 @@ class views_handler_filter_countries_list extends views_handler_filter_in_operat
         ),
       ),
       '#options' => countries_get_continents(),
-      '#element_validate' => array('_countries_element_array_filter'),
+      '#element_validate' => array('_countries_checkbox_filter'),
       '#default_value' => $this->options['filter']['continents'],
     );
   }

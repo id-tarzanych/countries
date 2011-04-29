@@ -191,3 +191,37 @@ function countries_update_7101() {
       'default' => LANGUAGE_NONE,
   ));
 }
+
+/**
+ * Convert fields into option module select lists.
+ */
+function countries_update_7200() {
+  foreach (field_read_fields(array(), array('include_inactive' => TRUE)) as $field_name => $info) {
+    if ($info['module'] == 'countries' && $info['type'] == 'country') {
+      $field_updated = isset($info['settings']['continents']);
+      foreach(field_read_instances(array('field_name' => $field_name), array('include_inactive' => TRUE)) as $instance_info) {
+        if (!$field_updated) {
+          if (!isset($info['settings']['continents']) && isset($instance_info['widget']['settings'])) {
+            $info['settings'] += $instance_info['widget']['settings'];
+            field_update_field($info);
+            $field_updated = TRUE;
+          }
+        }
+        if ($instance_info['widget']['type'] == 'country_select') {
+          $instance_info['widget']['type'] = 'options_select';
+          $instance_info['widget']['module'] = 'options';
+          $instance_info['widget']['settings'] = array();
+          field_update_instance($instance_info);
+        }
+      }
+      // Set the defaults if required.
+      if (!$field_updated) {
+        $info['settings'] += array(
+          'enabled' => COUNTRIES_ENABLED,
+          'continents' => array(),
+        );
+        field_update_field($info);
+      }
+    }
+  }
+}
