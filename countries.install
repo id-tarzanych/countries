@@ -57,6 +57,13 @@ function countries_schema() {
         'default' => 1,
         'description' => 'Whether the country is enabled.',
       ),
+      'language' => array(
+        'description' => 'The {languages}.language of this node.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => LANGUAGE_NONE,
+      ),
     ),
     'primary key' => array('cid'),
     'unique keys' => array(
@@ -74,6 +81,24 @@ function countries_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Implement hook_field_schema().
+ */
+function countries_field_schema($field) {
+  return array(
+    'columns' => array(
+      'iso2' => array(
+        'type' => 'varchar',
+        'length' => 2,
+        'not null' => FALSE,
+      ),
+    ),
+    'indexes' => array(
+      'iso2' => array('iso2'),
+    ),
+  );
 }
 
 /**
@@ -152,4 +177,17 @@ function countries_import_csv() {
 function countries_update_7100() {
   $t = get_t();
   drupal_set_message($t('Visit the countries !config_page to import the most recent iso changes.', array('!config_page' => l('configuration page', 'admin/config/regional/countries/import'))));
+}
+
+/**
+ * This adds a translatable country possiblity.
+ */
+function countries_update_7101() {
+  db_add_field('countries_country', 'language', array(
+    'description' => 'The {languages}.language of this node.',
+      'type' => 'varchar',
+      'length' => 12,
+      'not null' => TRUE,
+      'default' => LANGUAGE_NONE,
+  ));
 }

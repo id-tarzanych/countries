@@ -344,24 +344,6 @@ function countries_field_info() {
 }
 
 /**
- * Implement hook_field_schema().
- */
-function countries_field_schema($field) {
-  return array(
-    'columns' => array(
-      'iso2' => array(
-        'type' => 'varchar',
-        'length' => 2,
-        'not null' => FALSE,
-      ),
-    ),
-    'indexes' => array(
-      'iso2' => array('iso2'),
-    ),
-  );
-}
-
-/**
  * Implement hook_field_load().
  */
 function countries_field_load($obj_type, $objects, $field, $instances, $langcode, &$items) {
@@ -538,7 +520,7 @@ function countries_field_settings_form($field, $instance, $has_data) {
   $form['enabled'] = array(
     '#type' => 'radios',
     '#title' => t('Country status'),
-    '#default_value' => isset($settings['enabled']) ? $settings['enabled'] : '',
+    '#default_value' => isset($settings['enabled']) ? $settings['enabled'] : COUNTRIES_ENABLED,
     '#options' => array(
       COUNTRIES_ALL => t('Both'),
       COUNTRIES_ENABLED => t('Enabled countries only'),
@@ -805,6 +787,14 @@ function countries_country_lookup($value, $property = NULL) {
   foreach (countries_get_countries($property) as $iso2 => $country_value) {
     if ($value == $country_value) {
       return countries_get_country($iso2);
+    }
+  }
+  // Try the official name too when doing name searches.
+  if ($property == 'name') {
+    foreach (countries_get_countries('official_name') as $iso2 => $country_value) {
+      if ($value == $country_value) {
+        return countries_get_country($iso2);
+      }
     }
   }
   return FALSE;
