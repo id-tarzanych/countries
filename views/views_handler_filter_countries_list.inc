@@ -93,5 +93,6 @@ class views_handler_filter_countries_list extends views_handler_filter_in_operat
 
     $property = (isset($this->definition['property'])) ? $this->definition['property'] : 'name';
     $this->value_options = countries_filter(countries_get_countries($property), $options);
+    asort($this->value_options);
   }
 }
