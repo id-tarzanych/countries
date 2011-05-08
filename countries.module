@@ -653,21 +653,20 @@ function countries_feeds_processor_targets_alter(&$targets, $entity_type, $bundl
  * Callback defined via countries_feeds_processor_targets_alter().
  */
 function _countries_feeds_set_target($source, $entity, $target, $values) {
+  if (empty($values)) {
+    return;
+  }
+
+  // Handle non-multiple values.
+  if (!is_array($values)) {
+    $values = array($values);
+  }
+
   // Find the field name and country property keys.
   list($entity_type, $bundle_name, $field_name, $property) = explode(':', $target, 4);
   $field = field_read_field($field_name);
   $settings = $field['settings'];
   $continents = array_filter((array)$settings['continents']);
-
-  switch ($property) {
-    case 'iso2':
-    case 'iso3':
-    case 'numcode':
-      $values = explode(',', $values);
-      break;
-    default:
-      $values = array($values);
-  }
 
   // Iterate over all values.
   $i = 0;
