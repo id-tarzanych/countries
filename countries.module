@@ -311,8 +311,8 @@ function countries_get_countries($property = 'all') {
       ->orderBy('name', 'ASC')
       ->execute()
       ->fetchCol();
-    $_countríes = countries_load_multiple($cids);
-    foreach($_countríes as $country) {
+    $_countries = countries_load_multiple($cids);
+    foreach($_countries as $country) {
       // TODO: I18n
       // countries_localize_country($country);
       $countries[$country->iso2] = $country;
