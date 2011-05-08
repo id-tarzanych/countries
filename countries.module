@@ -640,7 +640,7 @@ function countries_feeds_processor_targets_alter(&$targets, $entity_type, $bundl
       foreach ($core_properties as $key => $label) {
         $targets[$entity_type . ':' . $bundle_name . ':' . $field_name . ':' . $key] = array(
           'name' => check_plain($instance['label']) . ': ' . $label,
-          'callback' => 'countries_feeds_processor_targets_alter_callback',
+          'callback' => '_countries_feeds_set_target',
           'description' => t('The @label field of the node.', array('@label' => $instance['label'])),
         );
       }
@@ -651,15 +651,25 @@ function countries_feeds_processor_targets_alter(&$targets, $entity_type, $bundl
 /**
  * Callback defined via countries_feeds_processor_targets_alter().
  */
-function countries_feeds_processor_targets_alter_callback($source, $entity, $target, $values) {
-  $values = (array) $values;
-
+function _countries_feeds_set_target($source, $entity, $target, $values) {
   // Find the field name and country property keys.
   list($entity_type, $bundle_name, $field_name, $property) = explode(':', $target, 4);
   $field = field_read_field($field_name);
   $settings = $field['settings'];
   $continents = array_filter((array)$settings['continents']);
 
+  switch ($property) {
+    case 'iso2':
+    case 'iso3':
+    case 'numcode':
+      $values = explode(',', $values);
+      break;
+    default:
+      $values = array($values);
+  }
+
+  // Iterate over all values.
+  $i = 0;
   $entity->{$field_name} = isset($entity->$field_name) ? $entity->{$field_name} : array();
   foreach ($values as $value) {
     if ($country = countries_country_lookup($value, $property)) {
@@ -676,9 +686,10 @@ function countries_feeds_processor_targets_alter_callback($source, $entity, $tar
         }
       }
 
-      $entity->{$field_name}[$entity->language][]['iso2'] = $country->iso2;
+      $entity->{$field_name}[$entity->language][$i]['iso2'] = $country->iso2;
+      $i++;
     }
-    if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED && count($entity->{$field_name}[$entity->language]) >= $field['cardinality']) {
+    if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED && $i >= $field['cardinality']) {
       break;
     }
   }
