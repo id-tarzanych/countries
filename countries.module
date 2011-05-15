@@ -784,3 +784,71 @@ function countries_views_api() {
     'path' => drupal_get_path('module', 'countries') . '/views',
   );
 }
+
+/**
+ * Implements hook_apachesolr_field_mappings()
+ */
+function countries_apachesolr_field_mappings() {
+  $mappings = array(
+    'country' => array(
+      'display_callback' => 'countries_apachesolr_display_callback',
+      'indexing_callback' => 'countries_apachesolr_indexing_callback',
+      'map callback' => 'countries_apachesolr_map_callback',
+      'index_type' => 'string',
+      'facets' => TRUE
+    )
+  );
+  return $mappings;
+}
+
+/**
+ * Callback that converts countries module field into an array
+ */
+function countries_apachesolr_indexing_callback($entity, $field_name, $index_key, $field_info) {
+  $fields = array();
+  if (!empty($entity->{$field_name})) {
+    $field = $entity->$field_name;
+    list($lang, $values) = each($field);
+    foreach ($values as $fval) {
+      $fields[] = array(
+        'key' => $index_key,
+        'value' => apachesolr_clean_text($fval['iso2']),
+      );
+    }
+  }
+  return $fields;
+}
+
+/**
+ * Map callback
+ */
+function countries_apachesolr_map_callback(array $values) {
+  $map = array();
+  foreach ($values as $value) {
+    $map[$value] = t(country_load($value)->name);
+  }
+  return $map;
+}
+
+/**
+ * Returns the country name to be used in the facet
+ *
+ *  @param $facet string
+ *    The indexed value
+ *  @param $options
+ *    An array of options including the hook_block $delta.
+ */
+function countries_apachesolr_display_callback($facet, $options) {
+  $fields = field_info_fields();
+  $field_name = $options['delta'];
+  if (isset($fields[$field_name])) {
+    $allowed_values = list_allowed_values($field);
+    if (isset($allowed_values[$facet])) {
+     $iso2 = field_filter_xss($allowed_values[$facet]);
+     return t(country_load($iso2)->name);
+    }
+  }
+  else {
+    return t(country_load($facet)->name);
+  }
+}
