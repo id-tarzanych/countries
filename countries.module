@@ -400,6 +400,14 @@ function countries_field_formatter_info() {
       'label' => t('ISO numeric-3 code'),
       'field types' => array('country'),
     ),
+    'country_continent' => array(
+      'label' => t('Continent'),
+      'field types' => array('country'),
+    ),
+    'country_continent_code' => array(
+      'label' => t('Continent code'),
+      'field types' => array('country'),
+    ),
   );
 
   // Third party module integration. Use "country_{$module}_data1_data2" format.
@@ -453,6 +461,16 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
 
       case 'country_number':
         $element[$delta]['#markup'] = theme('countries_number', array('country' => $country));
+        break;
+
+      case 'country_continent':
+        $continents = countries_get_continents();
+        $continent = isset($continents[$item['country']->continent]) ? $continents[$item['country']->continent] : '';
+        $element[$delta]['#markup'] = check_plain($continent);
+        break;
+
+      case 'country_continent_code':
+        $element[$delta]['#markup'] = check_plain($item['country']->continent);
         break;
 
       default:

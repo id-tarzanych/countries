@@ -90,7 +90,7 @@ function countries_tokens($type, $tokens, array $data = array(), array $options 
         case 'continent':
           $continents = countries_get_continents();
           $continent = isset($continents[$country->continent]) ? $continents[$country->continent] : '';
-          $replacements[$original] = $sanitize ? check_plain($$continent) : $continent;
+          $replacements[$original] = $sanitize ? check_plain($continent) : $continent;
           break;
 
         case 'continent-code':
