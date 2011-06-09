@@ -319,6 +319,10 @@ function countries_admin_delete_submit($form, &$form_state) {
   db_delete('countries_country')
     ->condition('iso2', $country->iso2)
     ->execute();
+
+  // Hook to allow other modules to interact with this module.
+  module_invoke_all('country_delete', $country);
+
   drupal_set_message(t('Deleted country %country.', array('%country' => $country->name)));
   $form_state['redirect'] = 'admin/config/content/countries';
 }

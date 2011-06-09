@@ -63,7 +63,7 @@ function countries_menu() {
   $items['admin/config/regional/countries/%country/edit'] = array(
     'title' => 'Edit',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 0,
+    'weight' => -10,
   );
   $items['admin/config/regional/countries/%country/delete'] = array(
     'title' => 'Delete country',
@@ -108,10 +108,17 @@ function country_save(&$country, $iso2 = FALSE) {
     drupal_write_record('countries_country', $country, array('iso2'));
     field_attach_update('country', $country);
     field_cache_clear();
+
+    // Hook to allow other modules to interact with this module.
+    $country->original_iso2 = $iso2;
+    module_invoke_all('country_update', $country);
   }
   else {
     drupal_write_record('countries_country', $country);
     field_attach_insert('country', $country);
+
+    // Hook to allow other modules to interact with this module.
+    module_invoke_all('country_insert', $country);
   }
   // TODO: I18n
   // countries_locale_process($country);
@@ -351,7 +358,10 @@ function countries_field_load($obj_type, $objects, $field, $instances, $langcode
   foreach ($objects as $id => $object) {
     foreach ($items[$id] as $delta => $item) {
       $items[$id][$delta]['country'] = countries_get_country($item['iso2']);
-      $items[$id][$delta]['safe'] = check_plain($items[$id][$delta]['country']->name);
+      $items[$id][$delta]['value'] = $item['iso2'];
+      $items[$id][$delta]['safe_value'] = check_plain($items[$id][$delta]['country']->name);
+      // @todo: Remove post 7.x-2.x
+      $items[$id][$delta]['safe'] = $items[$id][$delta]['safe_value'];
     }
   }
 }
@@ -361,9 +371,12 @@ function countries_field_load($obj_type, $objects, $field, $instances, $langcode
  */
 function countries_field_sanitize($obj_type, $object, $field, $instance, $langcode, &$items) {
   foreach ($items as $delta => $item) {
-    if (!isset($items[$delta]['safe'])) {
+    if (!isset($items[$delta]['safe_value'])) {
       $items[$delta]['country'] = countries_get_country($item['iso2']);
-      $items[$delta]['safe'] = check_plain($items[$id][$delta]['country']->name);
+      $items[$delta]['value'] = $item['iso2'];
+      $items[$delta]['safe_value'] = check_plain($items[$id][$delta]['country']->name);
+      // @todo: Remove post 7.x-2.x
+      $items[$delta]['safe'] = $items[$id][$delta]['safe_value'];
     }
   }
 }
@@ -439,7 +452,7 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
     $country = $item['country'];
     switch ($display['type']) {
       case 'country_default':
-        $element[$delta]['#markup'] = $item['safe'];
+        $element[$delta]['#markup'] = $item['safe_value'];
         break;
 
       case 'country_official':
@@ -447,7 +460,7 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
           $element[$delta]['#markup'] = check_plain($country->official_name);
         }
         else {
-          $element[$delta]['#markup'] = $item['safe'];
+          $element[$delta]['#markup'] = $item['safe_value'];
         }
         break;
 
