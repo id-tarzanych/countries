@@ -171,6 +171,7 @@ function countries_import_csv() {
   $insert->execute();
   watchdog('countries', "Pre-populated countries data.");
 }
+
 /**
  * This will flush the the menu cache to add the new import URL for country imports.
  */
@@ -224,4 +225,16 @@ function countries_update_7200() {
       }
     }
   }
+}
+
+/**
+ * This will flush any stale cache data and direct the users to the import URL for syncing with the countries csv import file.
+ */
+function countries_update_7201() {
+  $t = get_t();
+  drupal_set_message($t('Visit the countries !config_page to import the most recent iso changes from ISO !link.',
+    array(
+      '!config_page' => l($t('configuration page'), 'admin/config/regional/countries/import'),
+      '!link' => l($t('Newsletter VI-9'), 'http://www.iso.org/iso/newsletter_vi-9_fiji-myanmar_and_other_minor_corrections-incl_bulgaria.pdf', array('external' => 1))
+    )));
 }
