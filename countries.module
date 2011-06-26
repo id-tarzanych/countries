@@ -425,16 +425,30 @@ function countries_field_formatter_info() {
 
   // Third party module integration. Use "country_{$module}_data1_data2" format.
   if (module_exists('countryicons')) {
+    // @TODO: Resolve if we need a float compare or version compare.
+    // Version 2 introduced countryicons_api_version(), but maybe it is
+    // incorrectly returning a float?
+    $version = function_exists('countryicons_api_version') ? '2.0' : '1.0';
+
     foreach (countryicons_get_iconsets() as $iconsets) {
-      $formatter = implode('_', array('country', 'countryicons', 'image', $iconsets['name']));
+      // The only diff between versions 1 & 2 of countryicons is the key value.
+      $iconsets = (array) $iconsets;
+      $key = version_compare("$version", '2.0') >= 0 ? $iconsets['key'] : $iconsets['name'];
+      $formatter = implode('_', array('country', 'countryicons', 'image', $key));
       $formatters[$formatter] = array(
-        'label' => t('Country icon image ' . $iconsets['name']),
+        'label' => t('Country icon image ' . check_plain($key)),
         'field types' => array('country'),
       );
 
-      $formatter = implode('_', array('country', 'countryicons', 'sprite', $iconsets['name']));
+      $formatter = implode('_', array('country', 'countryicons', 'sprite', $key));
       $formatters[$formatter] = array(
-        'label' => t('Country icon sprite ' . $iconsets['name']),
+        'label' => t('Country icon sprite ' . check_plain($key)),
+        'field types' => array('country'),
+      );
+
+      $formatter = implode('_', array('country', 'countryicons', 'imagename', $key));
+      $formatters[$formatter] = array(
+        'label' => t('Country icon image and name ' . check_plain($key)),
         'field types' => array('country'),
       );
     }
@@ -487,9 +501,9 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
         break;
 
       default:
-        list(,$icon_module,$icon_type,$icon_set_name) = explode('_', $display['type'], 4);
+        list(,$icon_module, $icon_type, $icon_set_name) = explode('_', $display['type'], 4);
         if (module_exists($icon_module)) {
-          // countryicons formatters
+          // Third party module integration
           switch ($icon_module) {
             case 'countryicons':
               $variables = array(
@@ -498,14 +512,23 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
                 'alt'     => $country->iso2,
                 'title'   => $country->name,
               );
-              if ($icon_type == 'sprite') {
-                $element[$delta]['#markup'] = theme('countryicons_icon_sprite', $variables);
+
+              switch ($icon_type) {
+                case 'sprite':
+                  $element[$delta]['#markup'] = theme('countryicons_icon_sprite', $variables);
+                  break;
+
+                case 'imagename':
+                  $element[$delta]['#markup'] = theme('countryicons_icon', $variables) . ' ' . $item['safe_value'];
+                  break;
+
+                case 'image':
+                default:
+                  $element[$delta]['#markup'] = theme('countryicons_icon', $variables);
+                  break;
+
               }
-              else {
-                // Type 'image' is the default.
-                $element[$delta]['#markup'] = theme('countryicons_icon', $variables);
-              }
-              break;
+              break; // countryicons
 
           }
         }
@@ -883,3 +906,4 @@ function countries_apachesolr_display_callback($facet, $options) {
     return t(country_load($facet)->name);
   }
 }
+
