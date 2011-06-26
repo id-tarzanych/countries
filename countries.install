@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function countries_schema() {
   $schema['countries_country'] = array(
@@ -117,8 +117,8 @@ function countries_uninstall() {
 }
 
 /**
-* Helper function to import countries.
-**/
+ * Helper function to import countries.
+ */
 function countries_import_csv() {
   $t = get_t();
   $countries = array();
@@ -171,7 +171,6 @@ function countries_import_csv() {
   $insert->execute();
   watchdog('countries', "Pre-populated countries data.");
 }
-
 /**
  * This will flush the the menu cache to add the new import URL for country imports.
  */
@@ -200,7 +199,7 @@ function countries_update_7200() {
   foreach (field_read_fields(array(), array('include_inactive' => TRUE)) as $field_name => $info) {
     if ($info['module'] == 'countries' && $info['type'] == 'country') {
       $field_updated = isset($info['settings']['continents']);
-      foreach(field_read_instances(array('field_name' => $field_name), array('include_inactive' => TRUE)) as $instance_info) {
+      foreach (field_read_instances(array('field_name' => $field_name), array('include_inactive' => TRUE)) as $instance_info) {
         if (!$field_updated) {
           if (!isset($info['settings']['continents']) && isset($instance_info['widget']['settings'])) {
             $info['settings'] += $instance_info['widget']['settings'];

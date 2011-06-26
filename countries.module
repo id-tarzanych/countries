@@ -221,7 +221,7 @@ function countries_get_continents() {
 /**
  * Get the default continents. For internal use only.
  *
- * @see countries_get_continents().
+ * @see countries_get_continents()
  */
 function countries_get_default_continents() {
   return array(
@@ -320,7 +320,7 @@ function countries_get_countries($property = 'all') {
       ->execute()
       ->fetchCol();
     $_countries = countries_load_multiple($cids);
-    foreach($_countries as $country) {
+    foreach ($_countries as $country) {
       // TODO: I18n
       // countries_localize_country($country);
       $countries[$country->iso2] = $country;
@@ -501,7 +501,7 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
         break;
 
       default:
-        list(,$icon_module, $icon_type, $icon_set_name) = explode('_', $display['type'], 4);
+        list(, $icon_module, $icon_type, $icon_set_name) = explode('_', $display['type'], 4);
         if (module_exists($icon_module)) {
           // Third party module integration
           switch ($icon_module) {
@@ -840,7 +840,7 @@ function countries_views_api() {
 }
 
 /**
- * Implements hook_apachesolr_field_mappings()
+ * Implements hook_apachesolr_field_mappings().
  */
 function countries_apachesolr_field_mappings() {
   $mappings = array(
@@ -898,8 +898,8 @@ function countries_apachesolr_display_callback($facet, $options) {
   if (isset($fields[$field_name])) {
     $allowed_values = list_allowed_values($field);
     if (isset($allowed_values[$facet])) {
-     $iso2 = field_filter_xss($allowed_values[$facet]);
-     return t(country_load($iso2)->name);
+      $iso2 = field_filter_xss($allowed_values[$facet]);
+      return t(country_load($iso2)->name);
     }
   }
   else {
