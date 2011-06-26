@@ -1,0 +1,7 @@
+name = Countries Example
+description = "Countries example module"
+
+; Core version (required)
+core = 7.x
+
+dependencies[] = countries
