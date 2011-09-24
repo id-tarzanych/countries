@@ -26,7 +26,7 @@ function countries_configuration_options_form($form, &$form_state, $country, $na
 
   if (!empty($info['file'])) {
     $file_path = empty($info['file path']) ? drupal_get_path('module', $info['module']) : $info['file path'];
-    require_once DRUPAL_ROOT . '/' . $file_path . '/' . $item['file'];
+    require_once DRUPAL_ROOT . '/' . $file_path . '/' . $info['file'];
   }
 
   if (isset($info['title callback']) && $title = $info['title callback']($country)) {
