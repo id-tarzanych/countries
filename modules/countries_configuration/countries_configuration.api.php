@@ -41,6 +41,30 @@ function hook_countries_configuration_options() {
 }
 
 /**
+ * Provides a hook into dynamically changing the settings provided by
+ * hook_countries_configuration_options() in relation to a country.
+ *
+ * @param $values
+ *   The values with the default values loaded.
+ * @param $name
+ *   The machine name given to this country configuration set.
+ * @param $info
+ *   Additional info. Keyed elements are:
+ *     country       - the country object or iso2 code
+ *     is_new        - flag to see if there are any user data stored for this country
+ *     load_defaults - flag to load default values.
+ *                     This is used by the field settings to ensure that no
+ *                     defaults are loaded into the Field UI area.
+ */
+function hook_countries_configuration_options_alter(&$values, $name, $info) {
+  if ($name == 'address' && ! $info['is_new']) {
+    if ($overrides = address_country_details($info['country'])) {
+      $values['labels'] = $overrides['labels'] + $values['labels'];
+    }
+  }
+}
+
+/**
  * An example form callback provided by hook_countries_configuration_options().
  *
  * @param object $country
@@ -88,7 +112,10 @@ function example_address_country_admin_form_title($country) {
  * @param object $country
  */
 function example_address_country_configuration_usage($country) {
-  $settings = countries_load_configuration_options($country, 'address');
+  // Depreciated: This will log a warning in the watchdog table and will be
+  // removed in future versions.
+  // $settings = countries_load_configuration_options($country, 'address');
+  $settings = countries_configuration($country, 'address');
   drupal_set_message(t('Editting the %region for %country', array(
     '%region' => $settings['labels']['region'],
     '%country' => $country->name,

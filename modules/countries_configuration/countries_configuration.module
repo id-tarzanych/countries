@@ -48,14 +48,17 @@ function countries_configuration_options() {
 }
 
 /**
- * Helper function to load country address configuration options.
+ * Helper function to load country configuration options.
  */
-function countries_load_configuration_options($country, $name, $load_defaults = 1) {
+function countries_configuration($country, $name, $load_defaults = 1) {
   $config = array();
-  if ($data = db_query("SELECT a.data FROM {countries_data} a WHERE iso2 = :iso2 AND name = :name", array(':iso2' => $country->iso2, ':name' => $name))->fetchField()) {
+  $iso2 = is_object($country) ? $country->iso2 : $country;
+  $is_new = TRUE;
+  if ($data = db_query("SELECT a.data FROM {countries_data} a WHERE iso2 = :iso2 AND name = :name", array(':iso2' => $iso2, ':name' => $name))->fetchField()) {
     $config = unserialize($data);
+    $is_new = FALSE;
   }
-
+  
   // Load any defaults.
   if ($load_defaults) {
     $config_options = countries_configuration_options();
@@ -63,7 +66,22 @@ function countries_load_configuration_options($country, $name, $load_defaults = 
       $config += $config_options[$name]['default values'];
     }
   }
+  $info = array('country' => $country, 'is_new' => $is_new, 'load_defaults' => $load_defaults);
+  drupal_alter('countries_configuration_options', $config, $name, $info);
+
   return $config;
+}
+
+/**
+ * Depreciated. Use countries_configuration() instead.
+ *
+ * TODO: Drop function in next branch.
+ */
+function countries_load_configuration_options($country, $name, $load_defaults = 1) {
+  // Log a watchdog warning to force future compatiability.
+  $config_options = countries_configuration_options();
+  watchdog(WATCHDOG_WARNING, t('The function countries_load_configuration_options() is depreciated. Use countries_configuration() instead. Called by the @module module.'), array('@module' => $config_options[$name]['module']));
+  return countries_configuration($country, $name, $load_defaults);
 }
 
 /**
