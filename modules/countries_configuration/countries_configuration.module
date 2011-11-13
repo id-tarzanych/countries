@@ -58,7 +58,7 @@ function countries_configuration($country, $name, $load_defaults = 1) {
     $config = unserialize($data);
     $is_new = FALSE;
   }
-  
+
   // Load any defaults.
   if ($load_defaults) {
     $config_options = countries_configuration_options();
@@ -103,10 +103,10 @@ function countries_configuration_modules_uninstalled($modules) {
  * This tracks iso2 changes for maintaining the {countries_data} table.
  */
 function countries_configuration_country_update($country) {
-  if ($country->original_iso2 != $country->iso2) {
+  if (isset($country->original->iso2) && $country->original->iso2 != $country->iso2) {
     db_update('countries_data')
       ->fields(array('iso2' => $country->iso2))
-      ->condition('iso2', $country->original_iso2)
+      ->condition('iso2', $country->original->iso2)
       ->execute();
   }
 }

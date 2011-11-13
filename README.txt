@@ -3,23 +3,41 @@ Countries module - http://drupal.org/project/countries
 
 DESCRIPTION
 ------------
-This module provides four country related tasks.
+This module provides country related tasks. It replaces the Countries API and
+CCK Country modules from Drupal 6.
 
+The region data parts can be obtained using one of
+
+Location Taxonomize: http://drupal.org/project/location_taxonomize 
+Countries regions (Sandbox project): http://drupal.org/sandbox/aland/1311114
+
+Features include:
  * A countries database with an administrative interface.
- * A way to alter Drupals core country list.
- * A country FAPI element.
+ * To alter Drupals core country list.
  * A countries field.
+ * Ability to add any additional Fields to a country.
+ * Integration with Views, Token, Apache solr search and Feeds modules.
+ * Numerious methods to handle and filter the data.
+ * A country FAPI element.
+
+Countries 7.x-2.x only
+ * Entity API integration.
 
 REQUIREMENTS
 ------------
 Drupal 7.x
 
+For Countries 7.x-2.x and above
+
+ * Entity API
+   http://drupal.org/project/entity
+
 INSTALLATION
 ------------
-1.  To install the module copy the 'countries' folder to your 
-    sites/all/modules directory.
+1.  Place both the Entity API and Countries modules into your modules directory.
+    This is normally the "sites/all/modules" directory.
 
-2.  Go to admin/build/modules. Enable the module.
+2.  Go to admin/build/modules. Enable both modules.
     It is found in the Others section.
 
 Read more about installing modules at http://drupal.org/node/70151
@@ -54,16 +72,15 @@ For example, Taiwan has the following values:
  * Continent      - Asia
  * Enabled        - Yes
 
-The official names were taken from WikiPedia [2] and the majority of the
-continent information was imported from Country codes API project [3].
+The official names were originally taken from WikiPedia [2] and the majority of
+the continent information was imported from Country codes API project [3].
+
+Country updates are added when the ISO officially releases these. This process
+may be up to 2 - 6 months. South Sudans inclusion took around a month. Kosovo
+is taking many months, but this should be added in the near future as Kosovo is
+a member both the IMF and World Bank.
 
 Please report any omissions / errors.
-
-I have no plans to create a "Countries bundle", which would allow users to
-extend this table using the Fields API. I am willing to give someone CVS access
-to either create a sub-project within this module to do this or if done via
-another project, access to make requires changes within the Countries module to
-accomplish this task. And to anyone else that just wants to help!
 
 2 - Alter Drupals core country list
 
@@ -73,8 +90,8 @@ potential to rename these based on your personal or political preferences.
 
 ## Developers note: ##
 
-There is no need to make this module a dependency unless you use the FAPI or
-Field elements. A simple countries list should be generated using:
+There is no need to make this module a dependency unless you use the APII or
+Field element. A simple countries list should be generated using:
 
 --------------------------------------------------------------------------------
 <?php
@@ -89,6 +106,28 @@ To bypass any third party interaction via hook_countries_alter(), use:
 <php
   include_once DRUPAL_ROOT . '/includes/iso.inc';
   $countries = _country_get_predefined_list();
+?>
+--------------------------------------------------------------------------------
+
+But if you want to use this module, usage is as simple as:
+ 
+--------------------------------------------------------------------------------
+<php
+  # A list of enabled country objects.
+  $countries = countries_get_countries();
+  
+  # A list of enabled country names keyed by iso2.
+  # You can replace name with official_name, iso2, iso3 or numcode to get the
+  # other properties.  
+  $countries = countries_get_countries('name');
+
+  # You can also use filters defined in countries_filter() for all of these
+  # lists. Use 'all' as the first parameter to get a list of objects.
+  $filters = array(
+    'enabled' => COUNTRIES_ENABLED,
+    'continents' => 'OC',
+  );
+  $countries = countries_get_countries('all', $filters);
 ?>
 --------------------------------------------------------------------------------
 
@@ -140,9 +179,46 @@ based on status and continent.
 ?>
 --------------------------------------------------------------------------------
 
+For Countries 7.x-2.x and latter, we recommend using a select element instead.
+
+--------------------------------------------------------------------------------
+<?php
+  $element = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#default_value' => 'AU',
+    '#options' => countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED)),
+  );
+  
+  $filters = array(
+    // enabled options should be one of these constants:
+    // COUNTRIES_ALL, COUNTRIES_ENABLED, or COUNTRIES_DISABLED
+    'enabled' => COUNTRIES_ENABLED,
+    // The restrict by continent filter accepts an array of continent codes.
+    // The default continents that are defined are [code - name]:
+    // AF - Africa, AN - Antarctica, AS - Asia, EU - Europe,
+    // NA - North America, OC - Oceania, SA - South America, UN - Unknown
+    'continents' => array('EU', 'OC'),
+    // If you want a very granular control of the available countries.
+    'countries' => array('AU', 'CA', 'CN', 'MX', 'NZ', 'US'),
+  );
+  $element = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#default_value' => 'AU',
+    '#options' => countries_get_countries('name', $filters),
+    '#multiple' => TRUE, // multiple select
+    '#size' => 6,
+  );
+?>
+--------------------------------------------------------------------------------
+
 4 - A country field
 
 Provides a standard field called "Country", with a widget "Country select list".
+This expands the core Drupal Options list provide the functionality of either
+a select list, radios or checkboxes.
+
 The default display options are:
 
 Default (The country name)
@@ -190,8 +266,7 @@ on your site that uses the theme, then delete the code.
 --------------------------------------------------------------------------------
 
 Any invalid continent keys that are found are converted to t('Unknown'), so
-update all respective countries before deleting any existing values. Currently
-there is no front-end presentation of the continent information.
+update all respective countries before deleting any existing values. 
 
 3 - Hiding columns in the administrative country overview page.
 
@@ -212,11 +287,9 @@ The name, ISO alpha-2 and enabled columns can not be removed.
 ?>
 --------------------------------------------------------------------------------
 
-4 - I18n support?
+4 - I18n support (Countries 7.x-2.x only)
 
-2009-10-11
-  This is planned, but the i18n project is not even started to be ported yet.
-
+This is in the implemenation stages using the Entity API integration.
 
 5 - Why is the delete link hidden on some countries? Why is the edit ISO alpha-2
 code disabled on some countries?
@@ -240,9 +313,101 @@ From the Country codes API modules project page:
 The Countries module is based on the philosophy that only the ISO2 code can be
 trusted. All other data can be modified by the sites administrator, and the ISO2
 is the primary key. Then the most common country requirements are built on top
-of this base, providing the input elements, etc. 
+of this base, providing the input elements, etc.
 
-7 - Related modules
+Function                           Drupal 6                Drupal 7
+Provide a list of countries        Countries API           Drupal
+Update the countries list          N/A                     Countries        
+Provide a field element            CCK Country             Countries
+Country getter API                 Countries API           Countries
+
+
+Here is an approximate mapping of the Country API functions in the Countries
+module. Note that the Country API module generally returns an array, while the
+Countries module returns an object.
+
+Countries API module
+--------------------------------------------------------------------------------
+<?php
+
+# 1 - All countries (an array of country arrays)
+$countries = countries_api_get_list();
+
+# 2 - Load a country (an array)
+$country = countries_api_get_country($iso2_or_iso3);
+$country = countries_api_iso2_get_country($iso2);
+$country = countries_api_iso3_get_country($iso3);
+$country = _countries_api_iso_get_country($property, $value);
+
+# 3 - Get a countries name
+$name = countries_api_get_name($iso2_or_iso3);
+$name = countries_api_iso2_get_name($iso2);
+$name = countries_api_iso3_get_name($iso3);
+
+# 4 - Toggle between ISO character codes
+$iso3 = countries_api_iso2_get_iso3($iso2);
+$iso2 = countries_api_iso3_get_iso2($code);
+
+# 5 - Option lists
+$list = countries_api_get_array($list_key_property, $list_option_property);
+$standard_list = countries_api_get_options_array();
+?>
+--------------------------------------------------------------------------------
+
+Countries module
+--------------------------------------------------------------------------------
+<?php
+# 1 - All countries (an array of country objects)
+$countries = countries_get_countries();
+
+# 2 - Load a country (an object)
+$country = countries_get_country($iso2);
+$country = countries_country_lookup($value);
+$country = countries_country_lookup($value, $property);
+
+# 3 - Get a countries name
+
+// The recommended method for an existing country using ISO 2 code
+$name = countries_get_country($iso2)->name;
+
+// If the ISO 2 code can not be trusted:
+$name = $country = countries_get_country($iso2) ? $country->name : '';
+
+// Any property (iso2, iso3, num code or name) supplied by an end user
+$name = $country = countries_country_lookup($value) ? $country->name : '';
+
+# 4 - Toggle between ISO character codes
+$iso3 = countries_get_country($iso2)->iso3;
+$iso2 = $country = countries_country_lookup($iso3, 'iso3') ? $country->iso2 : '';
+
+# 5 - Option lists
+// If keyed by iso2 value.
+$list = countries_get_countries($list_option_property);
+
+// Other lists that are keyed differently would need to be generated manually.
+$list = array();
+foreach (countries_get_countries() as $country) {
+  $list[$country->numcode] = $country->name;
+}
+
+$standard_list = array('' => t('Please Choose')) + countries_get_countries('name);
+
+# Please note that the following are equivalent. 
+  // Core Drupal iso2/name listing.
+  // Returns a list of countries passed through hook_countries_alter().
+  include_once DRUPAL_ROOT . '/includes/locale.inc';
+  $list = country_get_list();
+
+  // Countries module.
+  // Get a list of enabled countries and then allow other modules to update this
+  // list via hook_countries_alter(). This avoids loading 'include/locale.inc'.
+  $list = countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED));
+  countries_invoke_additional_countries_alter($list);
+
+?>
+--------------------------------------------------------------------------------
+
+7 - Related modules (as of early 2010)
 
 Most other related modules involve external geo-data lookups / regional data
 integration.
@@ -330,6 +495,9 @@ CCK - Provides CCK or Fields
 AUTHOR
 ------
 Alan D. - http://drupal.org/user/198838.
+Florian Weber (webflo) - http://drupal.org/user/254778.
+
+Thanks to everybody else who have helped test and contribute patches! 
 
 REFERENCES
 ----------

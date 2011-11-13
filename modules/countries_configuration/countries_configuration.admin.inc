@@ -56,7 +56,12 @@ function countries_configuration_options_form($form, &$form_state, $country, $na
   $form['data'] = $info['form callback']($country, $values, $form);
 
   // Allow other modules to hook directly to the form data.
-  drupal_alter('countries_configuration_form_' . $name, $form['data'], $form_state, $country, $form);
+  $addtional = array(
+    'form_state' => &$form_state,
+    'complete_form' => &$form,
+    'country' => $country,
+  );
+  drupal_alter('countries_configuration_form_' . $name, $form['data'], $values, $addtional);
 
   // Allow these hooks to define their own submit handlers.
   $reset_handlers = empty($form['reset']['#submit']) ? array() : $form['reset']['#submit'];

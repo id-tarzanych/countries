@@ -22,30 +22,75 @@ function countries_example_menu() {
   return $items;
 }
 
-function countries_example(&$form, &$form_state) {
-  $default_country = variable_get('countries_example_default_country_1', '');
+function countries_example($form, &$form_state) {
+  // Select element examples
+
+  // Loads a list of countries that are enabled.
+  $enabled_country_list = countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED));
+
   $form['countries_example_default_country_1'] = array(
-    '#type' => 'country',
-    '#title' => 'Select a country',
-    '#default_value' => isset($edit['iso2']) ? $edit['iso2'] : $default_country,
+    '#type' => 'select',
+    '#title' => t('Select a country'),
+    '#default_value' => variable_get('countries_example_default_country_1', ''),
+    '#options' => array('' => t('Please select a country')) + $enabled_country_list,
   );
 
-  $default_country = variable_get('countries_example_default_country_2', '');
   $form['countries_example_default_country_2'] = array(
-    '#type' => 'country',
-    '#title' => 'Select a country',
+    '#type' => 'select',
+    '#title' => t('Select countries'),
+    '#default_value' => variable_get('countries_example_default_country_2', array()),
+    '#options' => $enabled_country_list,
+    '#multiple' => TRUE,
     '#size' => 5,
-    '#default_value' => isset($edit['iso2']) ? $edit['iso2'] : $default_country,
   );
 
-  $default_country = variable_get('countries_example_default_country_3', '');
+  $eu_countries = countries_filter($enabled_country_list, array(
+    'continents' => array('EU')));
   $form['countries_example_default_country_3'] = array(
-    '#type' => 'country',
-    '#title' => 'Select a country in Europe',
+    '#type' => 'select',
+    '#title' => t('Select European countries'),
+    '#default_value' => variable_get('countries_example_default_country_3', array()),
+    '#options' => $eu_countries,
+    '#multiple' => TRUE,
     '#size' => 5,
-    '#default_value' => isset($edit['iso2']) ? $edit['iso2'] : $default_country,
+  );
+
+  // Country element examples
+  $form['countries_example_default_country_4'] = array(
+    '#type' => 'country',
+    '#title' => 'Select a country (country element)',
+    '#default_value' => variable_get('countries_example_default_country_4', ''),
+  );
+
+  $form['countries_example_default_country_5'] = array(
+    '#type' => 'country',
+    '#title' => 'Select countries (country element)',
+    '#default_value' => variable_get('countries_example_default_country_5', ''),
+    '#multiple' => TRUE,
+    '#size' => 5,
+  );
+
+  $form['countries_example_default_country_6'] = array(
+    '#type' => 'country',
+    '#title' => 'Select European countries (country element)',
+    '#size' => 5,
+    '#multiple' => TRUE,
+    '#default_value' => variable_get('countries_example_default_country_6', ''),
     '#filters' => array(
       'continents' => array('EU'),
+    ),
+  );
+
+  $form['countries_example_default_country_7'] = array(
+    '#type' => 'country',
+    '#title' => 'Select one to three countries in America (country element)',
+    '#size' => 8,
+    '#required' => TRUE,
+    '#cardinality' => 3,
+    '#multiple' => TRUE,
+    '#default_value' => variable_get('countries_example_default_country_7', ''),
+    '#filters' => array(
+      'continents' => array('NA', 'SA'),
     ),
   );
 
