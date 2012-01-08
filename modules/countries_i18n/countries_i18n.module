@@ -29,7 +29,7 @@ function countries_i18n_i18n_object_info() {
     'placeholders' => array(
       '%country' => 'iso2',
     ),
-    'edit path' => 'admin/config/regional/countries/%country/edit',
+    'edit path' => 'admin/config/regional/countries/%country',
     'translate tab' => 'admin/config/regional/countries/%country/translate',
     'list callback' => 'countries_get_countries',
     // Metadata for string translation
