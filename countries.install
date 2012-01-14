@@ -81,7 +81,7 @@ function countries_schema() {
 }
 
 /**
- * Implement hook_field_schema().
+ * Implements hook_field_schema().
  */
 function countries_field_schema($field) {
   return array(
@@ -99,7 +99,7 @@ function countries_field_schema($field) {
 }
 
 /**
- * Implement hook_install().
+ * Implements hook_install().
  */
 function countries_install() {
   // Import the data.
@@ -107,7 +107,7 @@ function countries_install() {
 }
 
 /**
- * Implement hook_uninstall().
+ * Implements hook_uninstall().
  */
 function countries_uninstall() {
   variable_del('countries_continents');
@@ -177,7 +177,7 @@ function countries_update_7100() {
 }
 
 /**
- * This adds a translatable country possiblity.
+ * This adds a translatable country possibility.
  */
 function countries_update_7101() {
   db_add_field('countries_country', 'language', array(

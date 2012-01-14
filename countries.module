@@ -10,7 +10,7 @@ define ('COUNTRIES_VIEWS_WIDGET_FIELD', 1);
 define ('COUNTRIES_VIEWS_WIDGET_CUSTOM', 2);
 
 /**
- * Implement hook_theme().
+ * Implements hook_theme().
  */
 function countries_theme() {
   return array(
@@ -19,7 +19,7 @@ function countries_theme() {
 }
 
 /**
- * Implement hook_menu().
+ * Implements hook_menu().
  */
 function countries_menu() {
   $items = array();
@@ -102,7 +102,7 @@ function countries_page_title($country) {
 }
 
 /**
- * Implement hook_element_info().
+ * Implements hook_element_info().
  */
 function countries_element_info() {
   $type['country'] = array(
@@ -312,7 +312,7 @@ function countries_filter_query_alter(&$query, $filters = array(), $alias = 'c')
 }
 
 /**
- * Implement hook_countries_alter().
+ * Implements hook_countries_alter().
  *
  * Currently the only usage in core is in system module when
  * setting the sites default country.
@@ -385,7 +385,7 @@ function countries_get_countries($property = 'all', $filters = array()) {
 }
 
 /**
- * Implement hook_field_info().
+ * Implements hook_field_info().
  */
 function countries_field_info() {
   return array(
@@ -428,7 +428,7 @@ function countries_entity_metadata_field_property_get($entity, array $options, $
 }
 
 /**
- * Implement hook_field_load().
+ * Implements hook_field_load().
  *
  * These results are cached, so only set the value to the iso2 value here to
  * provide consistency with other field modules.
@@ -446,7 +446,7 @@ function countries_field_load($entity_type, $entities, $field, $instances, $lang
 }
 
 /**
- * Implement hook_field_is_empty().
+ * Implements hook_field_is_empty().
  */
 function countries_field_is_empty($item, $field) {
   return empty($item['iso2']);
@@ -642,7 +642,7 @@ function countries_allowed_values($field) {
 }
 
 /**
- * Implement hook_field_settings_form().
+ * Implements hook_field_settings_form().
  */
 function countries_field_settings_form($field, $instance, $has_data) {
   $form = array();

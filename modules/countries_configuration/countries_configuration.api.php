@@ -16,13 +16,13 @@ function hook_countries_configuration_options() {
     // This should be an unique key for this option. To avoid conflicts with
     // other modules, use, or prefix with, the modules name.
     'address' => array(
-      // This provides the tab title when editting the form.
+      // This provides the tab title when editing the form.
       'title' => t('Addresses'),
       // This should provide the form of elements that you want to save.
       'form callback' => 'example_address_country_admin_form',
       // Optional: Provides a better title for the page edit.
       'title callback' => 'example_address_country_admin_form_title',
-      // Required: Used when no data exists or when reseting the country data.
+      // Required: Used when no data exists or when resetting the country data.
       'default values' => array(
         'labels' => array(),
       ),

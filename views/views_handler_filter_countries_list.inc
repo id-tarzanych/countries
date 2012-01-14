@@ -6,7 +6,7 @@
  */
 
 /**
- * Filter by ISO Code 2. The Lable is defined via 'property' in hook_views_data.
+ * Filter by ISO Code 2. The Label is defined via 'property' in hook_views_data.
  */
 class views_handler_filter_countries_list extends views_handler_filter_in_operator {
   function option_definition() {

@@ -8,7 +8,7 @@ CCK Country modules from Drupal 6.
 
 The region data parts can be obtained using one of
 
-Location Taxonomize: http://drupal.org/project/location_taxonomize 
+Location Taxonomize: http://drupal.org/project/location_taxonomize
 Countries regions (Sandbox project): http://drupal.org/sandbox/aland/1311114
 
 Features include:
@@ -46,7 +46,7 @@ UPGRADING
 ---------
 Any updates should be automatic. Just remember to run update.php!
 
-## Prerelease upgrades ##
+## Pre-release upgrades ##
 
 If you have installed the CVS version prior to 2009-10-11, you will need to
 manually change the database column {countries_country}.printable_name to
@@ -110,15 +110,15 @@ To bypass any third party interaction via hook_countries_alter(), use:
 --------------------------------------------------------------------------------
 
 But if you want to use this module, usage is as simple as:
- 
+
 --------------------------------------------------------------------------------
 <php
   # A list of enabled country objects.
   $countries = countries_get_countries();
-  
+
   # A list of enabled country names keyed by iso2.
   # You can replace name with official_name, iso2, iso3 or numcode to get the
-  # other properties.  
+  # other properties.
   $countries = countries_get_countries('name');
 
   # You can also use filters defined in countries_filter() for all of these
@@ -189,7 +189,7 @@ For Countries 7.x-2.x and latter, we recommend using a select element instead.
     '#default_value' => 'AU',
     '#options' => countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED)),
   );
-  
+
   $filters = array(
     // enabled options should be one of these constants:
     // COUNTRIES_ALL, COUNTRIES_ENABLED, or COUNTRIES_DISABLED
@@ -248,7 +248,7 @@ These are generated using a variable_get() like this:
 --------------------------------------------------------------------------------
 
 To update these, you need to set the system variable 'countries_continents'. The
-easiest way to do this is to cut and paste the following into your themes 
+easiest way to do this is to cut and paste the following into your themes
 template.php, changing the array values to suit your requirements. Load one page
 on your site that uses the theme, then delete the code.
 
@@ -266,7 +266,7 @@ on your site that uses the theme, then delete the code.
 --------------------------------------------------------------------------------
 
 Any invalid continent keys that are found are converted to t('Unknown'), so
-update all respective countries before deleting any existing values. 
+update all respective countries before deleting any existing values.
 
 3 - Hiding columns in the administrative country overview page.
 
@@ -303,7 +303,7 @@ you can no longer select them when they are disabled.
 
 The countries_api is a just that, an API locked into a back-end country and
 regions database that has no configurable options. It main purpose is converting
-country code data from one format to another. 
+country code data from one format to another.
 
 From the Country codes API modules project page:
 
@@ -317,7 +317,7 @@ of this base, providing the input elements, etc.
 
 Function                           Drupal 6                Drupal 7
 Provide a list of countries        Countries API           Drupal
-Update the countries list          N/A                     Countries        
+Update the countries list          N/A                     Countries
 Provide a field element            CCK Country             Countries
 Country getter API                 Countries API           Countries
 
@@ -392,7 +392,7 @@ foreach (countries_get_countries() as $country) {
 
 $standard_list = array('' => t('Please Choose')) + countries_get_countries('name);
 
-# Please note that the following are equivalent. 
+# Please note that the following are equivalent.
   // Core Drupal iso2/name listing.
   // Returns a list of countries passed through hook_countries_alter().
   include_once DRUPAL_ROOT . '/includes/locale.inc';
@@ -417,7 +417,7 @@ A quick search on drupalmodules.com provided the following list
  * addresses - http://drupal.org/project/addresses
    A comprehensive module that is covers countries, regions, zip codes, postal
    formats, ...
-   
+
  * zipcode (CCK) - http://drupal.org/project/zipcode
    Hardcode validation of the Zip codes for 8 countries.
 
@@ -439,25 +439,25 @@ A quick search on drupalmodules.com provided the following list
 
  * Hostip - http://drupal.org/project/hostip
    IP to Country lookup.
-    
+
  * GeoUser - http://drupal.org/project/geouser
    IP to Country lookup.
-    
+
  * GeoIP API - http://drupal.org/project/geoip
    API for external database.
-    
+
  * Country codes API - http://drupal.org/project/countries_api
    API for mapping country / region data.
-    
+
  * Ad GeoIP - http://drupal.org/project/ad_geoip
    Adds geotargeting functionality to the Drupal advertisement module.
-    
+
  * SIN - CCK - http://drupal.org/project/sin
    Country Social Insurance Numbers CCK field.
-    
+
  * Country code - http://drupal.org/project/country_code
    Location content handling based on the user's IP address.
-    
+
  * Site Country - http://drupal.org/project/site_country
    Enables site default country. (Now in core)
 
@@ -480,12 +480,12 @@ ip2nation          y   y       y   y   y    y
 ip2country         y   y           y
 profile_location   y   y       y                  -  Profile region / country
 sin                y   y                          y  Social Insurance Numbers
-site_country           y  core c                     Default country 
+site_country           y  core c                     Default country
 zipcode                y       c*                 y  Zipcodes
-    
+
 Key
 ---
-DB - Country database: y - db, c - code, c* - limited code info 
+DB - Country database: y - db, c - code, c* - limited code info
 IP2C - IP to Country lookup
 IPO - IP to xxx. Gets geodata about the users location
 Flags - Country flags
@@ -497,7 +497,7 @@ AUTHOR
 Alan D. - http://drupal.org/user/198838.
 Florian Weber (webflo) - http://drupal.org/user/254778.
 
-Thanks to everybody else who have helped test and contribute patches! 
+Thanks to everybody else who have helped test and contribute patches!
 
 REFERENCES
 ----------

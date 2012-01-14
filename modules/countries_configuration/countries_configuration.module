@@ -11,7 +11,7 @@
  */
 
 /**
- * Implement hook_menu().
+ * Implements hook_menu().
  */
 function countries_configuration_menu() {
   $items = array();
