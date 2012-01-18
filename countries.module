@@ -428,19 +428,18 @@ function countries_entity_metadata_field_property_get($entity, array $options, $
 }
 
 /**
- * Implements hook_field_load().
- *
- * These results are cached, so only set the value to the iso2 value here to
- * provide consistency with other field modules.
+ * Implements hook_field_prepare_view().
  */
-function countries_field_load($entity_type, $entities, $field, $instances, $langcode, &$items) {
+function countries_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
-      $items[$id][$delta]['value'] = $item['iso2'];
-      $items[$id][$delta]['country'] = countries_get_country($item['iso2']);
-      $items[$id][$delta]['safe_value'] = check_plain($items[$id][$delta]['country']->name);
-      // @todo: Remove post 7.x-2.x
-      $items[$id][$delta]['safe'] = $items[$id][$delta]['safe_value'];
+      if (!isset($item['country'])) {
+        $items[$id][$delta]['value'] = $item['iso2'];
+        $items[$id][$delta]['country'] = countries_get_country($item['iso2']);
+        $items[$id][$delta]['safe_value'] = check_plain($items[$id][$delta]['country']->name);
+        // @todo: Remove post 7.x-2.x
+        $items[$id][$delta]['safe'] = $items[$id][$delta]['safe_value'];
+      }
     }
   }
 }
