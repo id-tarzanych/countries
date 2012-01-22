@@ -46,11 +46,9 @@ UPGRADING
 ---------
 Any updates should be automatic. Just remember to run update.php!
 
-## Pre-release upgrades ##
-
-If you have installed the CVS version prior to 2009-10-11, you will need to
-manually change the database column {countries_country}.printable_name to
-{countries_country}.official_name. No releases require this change.
+To reset your countries database with the ISO defined countries list, visit
+http://www.example.com/admin/config/regional/countries/import to manually
+select which country properties to update.
 
 FEATURES
 --------
@@ -90,70 +88,14 @@ potential to rename these based on your personal or political preferences.
 
 ## Developers note: ##
 
-There is no need to make this module a dependency unless you use the APII or
-Field element. A simple countries list should be generated using:
-
---------------------------------------------------------------------------------
-<?php
-  include_once DRUPAL_ROOT . '/includes/locale.inc';
-  $countries = country_get_list();
-?>
---------------------------------------------------------------------------------
-
-To bypass any third party interaction via hook_countries_alter(), use:
-
---------------------------------------------------------------------------------
-<php
-  include_once DRUPAL_ROOT . '/includes/iso.inc';
-  $countries = _country_get_predefined_list();
-?>
---------------------------------------------------------------------------------
-
-But if you want to use this module, usage is as simple as:
-
---------------------------------------------------------------------------------
-<php
-  # A list of enabled country objects.
-  $countries = countries_get_countries();
-
-  # A list of enabled country names keyed by iso2.
-  # You can replace name with official_name, iso2, iso3 or numcode to get the
-  # other properties.
-  $countries = countries_get_countries('name');
-
-  # You can also use filters defined in countries_filter() for all of these
-  # lists. Use 'all' as the first parameter to get a list of objects.
-  $filters = array(
-    'enabled' => COUNTRIES_ENABLED,
-    'continents' => 'OC',
-  );
-  $countries = countries_get_countries('all', $filters);
-?>
---------------------------------------------------------------------------------
+There is no need to make this module a dependency unless you use the API or
+Field element. See the countries_example module for examples.
 
 3 - A country FAPI element
 
 After programming yet another select list with a country drop down, I
 encapsulated the logic into a simple FAPI element. By default it uses
 country_get_list(), so filters based on the countries status.
-
-The simplest usage for a single select country drop down list is:
-
---------------------------------------------------------------------------------
-<?php
-  $element = array(
-    '#type' => 'country',
-    '#default_value' => 'AU',
-  );
-
-  // a better example for the default value would be:
-  $default_country = variable_get('site_default_country', '');
-  $element = array(
-    '#type' => 'country',
-    '#default_value' => isset($edit['iso2']) ? $edit['iso2'] : $default_country,
-  );
-?>
---------------------------------------------------------------------------------
 
 Custom filters are available to bypass the default country_get_list(), to filter
 based on status and continent.
@@ -232,9 +174,9 @@ HOWTO / FAQ
 
 1 - Revert the database to the original values.
 
-Currently this is not possible. You would have to uninstall and install the
-module. Any customizations, (and maybe fields), would need to be recreated and
-populated
+To reset your countries database with the ISO defined countries list, visit
+http://www.example.com/admin/config/regional/countries/import to manually
+select which countries to update. Replace www.example.com with your sites URL.
 
 2 - Change the continent list.
 
@@ -289,7 +231,7 @@ The name, ISO alpha-2 and enabled columns can not be removed.
 
 4 - I18n support (Countries 7.x-2.x only)
 
-This is in the implemenation stages using the Entity API integration.
+This is in the early implemenation stages using the Entity API integration.
 
 5 - Why is the delete link hidden on some countries? Why is the edit ISO alpha-2
 code disabled on some countries?
@@ -393,6 +335,7 @@ foreach (countries_get_countries() as $country) {
 $standard_list = array('' => t('Please Choose')) + countries_get_countries('name);
 
 # Please note that the following are equivalent.
+
   // Core Drupal iso2/name listing.
   // Returns a list of countries passed through hook_countries_alter().
   include_once DRUPAL_ROOT . '/includes/locale.inc';
@@ -407,93 +350,10 @@ $standard_list = array('' => t('Please Choose')) + countries_get_countries('name
 ?>
 --------------------------------------------------------------------------------
 
-7 - Related modules (as of early 2010)
+7 - Related modules (as of early 2010) see http://drupal.org/node/1412962
 
-Most other related modules involve external geo-data lookups / regional data
-integration.
-
-A quick search on drupalmodules.com provided the following list
-
- * addresses - http://drupal.org/project/addresses
-   A comprehensive module that is covers countries, regions, zip codes, postal
-   formats, ...
-
- * zipcode (CCK) - http://drupal.org/project/zipcode
-   Hardcode validation of the Zip codes for 8 countries.
-
- * GeoNames - http://drupal.org/project/geonames
-   XML-based Services from GeoNames.
-
- * Profile Location - http://drupal.org/project/profile_location
-   Region / Country profile field.
-
- * IP to Country - http://drupal.org/project/ip2cc
-   IP to Country lookup.
-
- * IP-based Determination of a Visitor's Country
-      - http://drupal.org/project/ip2country
-   IP to Country lookup.
-
- * IP2Nation API - http://drupal.org/project/ip2nation
-   IP to Country lookup.
-
- * Hostip - http://drupal.org/project/hostip
-   IP to Country lookup.
-
- * GeoUser - http://drupal.org/project/geouser
-   IP to Country lookup.
-
- * GeoIP API - http://drupal.org/project/geoip
-   API for external database.
-
- * Country codes API - http://drupal.org/project/countries_api
-   API for mapping country / region data.
-
- * Ad GeoIP - http://drupal.org/project/ad_geoip
-   Adds geotargeting functionality to the Drupal advertisement module.
-
- * SIN - CCK - http://drupal.org/project/sin
-   Country Social Insurance Numbers CCK field.
-
- * Country code - http://drupal.org/project/country_code
-   Location content handling based on the user's IP address.
-
- * Site Country - http://drupal.org/project/site_country
-   Enables site default country. (Now in core)
-
- * GeoSniper - http://drupal.org/project/geosniper
-   User information in a block.
-
-                  Drupal ver.  Features
-                  5.x 6.x 7.x  DB IP2C IPO Flags CCK Other / Notes
-ad_geoip           y   y       y   y                 ad module extension
-addresses                      y                  y  Multiple fields
-country_code           y       c                     Site switching
-countries_api      y   y       y                     Data mapping
-geoip              y   y       c   y
-geonames           y   y       y   y   y
-geosniper              y               y             Info block
-geouser                y       c   y                 Stored against user
-hostip             y               y
-ip2cc              y   y           y
-ip2nation          y   y       y   y   y    y
-ip2country         y   y           y
-profile_location   y   y       y                  -  Profile region / country
-sin                y   y                          y  Social Insurance Numbers
-site_country           y  core c                     Default country
-zipcode                y       c*                 y  Zipcodes
-
-Key
----
-DB - Country database: y - db, c - code, c* - limited code info
-IP2C - IP to Country lookup
-IPO - IP to xxx. Gets geodata about the users location
-Flags - Country flags
-CCK - Provides CCK or Fields
-
-
-AUTHOR
-------
+AUTHORS
+-------
 Alan D. - http://drupal.org/user/198838.
 Florian Weber (webflo) - http://drupal.org/user/254778.
 

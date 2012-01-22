@@ -221,6 +221,7 @@ function countries_country_expand($element) {
   // Allow other modules to update this list.
   countries_invoke_additional_countries_alter($element['#options']);
 
+  // TODO: This appears to be overridden via core now. Test and remove.
   // If not required, add a none option. This can be overridden via setting
   // the $element['#empty_value'] parameter to NULL.
   if (empty($element['#required']) && !isset($element['#empty_value'])) {
