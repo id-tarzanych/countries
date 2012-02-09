@@ -943,6 +943,16 @@ function countries_views_api() {
 }
 
 /**
+ * Implements hook_migrate_api().
+ */
+function countries_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}
+
+/**
  * Implements hook_apachesolr_field_mappings().
  */
 function countries_apachesolr_field_mappings() {
