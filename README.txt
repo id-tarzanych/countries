@@ -42,6 +42,16 @@ INSTALLATION
 
 Read more about installing modules at http://drupal.org/node/70151
 
+3.  Updating the core list
+    The module does not override the standard name that is defined by the core
+    Drupal country list during installation. If you want to bulk update all
+    standard names to those of ISO 3166-1, visit the bulk update page and select
+    the countries to update. Selecting all updates should bring the database in
+    sync with the ISO standard.
+    
+    The bulk update page is found here:
+    http://www.example.com/admin/config/regional/countries/import
+
 UPGRADING
 ---------
 Any updates should be automatic. Just remember to run update.php!
@@ -59,7 +69,7 @@ This is a simple table based on the ISO 3166-1 alpha-2 codes [1]. It covers the
 countries standard name, official name, ISO 3166-1 alpha-3 code, UN numeric code
 (ISO 3166-1 numeric-3) and continent (Africa, Antarctica, Asia, Europe, North
 America, Oceania, South America). An enabled flag defines a countries status.
-
+ 
 For example, Taiwan has the following values:
 
  * Name           - Taiwan
@@ -71,7 +81,8 @@ For example, Taiwan has the following values:
  * Enabled        - Yes
 
 The official names were originally taken from WikiPedia [2] and the majority of
-the continent information was imported from Country codes API project [3].
+the continent information was imported from Country codes API project [3]. This
+have been since standardised with the ISO 3166-1 standard. 
 
 Country updates are added when the ISO officially releases these. This process
 may be up to 2 - 6 months. South Sudans inclusion took around a month. Kosovo
@@ -303,23 +314,23 @@ Countries module
 $countries = countries_get_countries();
 
 # 2 - Load a country (an object)
-$country = countries_get_country($iso2);
+$country = country_load($iso2);
 $country = countries_country_lookup($value);
 $country = countries_country_lookup($value, $property);
 
 # 3 - Get a countries name
 
 // The recommended method for an existing country using ISO 2 code
-$name = countries_get_country($iso2)->name;
+$name = country_load($iso2)->name;
 
 // If the ISO 2 code can not be trusted:
-$name = $country = countries_get_country($iso2) ? $country->name : '';
+$name = ($country = country_load($iso2) ? $country->name : '');
 
 // Any property (iso2, iso3, num code or name) supplied by an end user
 $name = $country = countries_country_lookup($value) ? $country->name : '';
 
 # 4 - Toggle between ISO character codes
-$iso3 = countries_get_country($iso2)->iso3;
+$iso3 = country_load($iso2)->iso3;
 $iso2 = $country = countries_country_lookup($iso3, 'iso3') ? $country->iso2 : '';
 
 # 5 - Option lists
@@ -351,6 +362,24 @@ $standard_list = array('' => t('Please Choose')) + countries_get_countries('name
 --------------------------------------------------------------------------------
 
 7 - Related modules (as of early 2010) see http://drupal.org/node/1412962
+
+
+CHANGE LOG
+----------
+
+Countries 7.x-1.x to 7.x-2.x
+1) Entity API integration
+
+   This is now an dependency.  
+
+2) countries_get_country() is been depreciated.
+
+   Use country_load() instead.
+
+3) countries_get_countries() will throw an Exception if you attempt to
+   use it to lookup an invalid property.
+
+4) CRUD functions have been completely refactored.
 
 AUTHORS
 -------

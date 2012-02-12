@@ -1,0 +1,673 @@
+<?php
+
+/**
+ * @file
+ * Tests for countries.module.
+ *
+ * Tests required:
+ *  - Installation and the insertion / overrides of the up to date countries.
+ *    @see CountriesBaseInstallUnitTest
+ *  - The country lookup function and country lookup query alter.
+ *    @see CountriesLookupUnitTest
+ *  - CRUD of existing or core records.
+ *  - CRUD of user created records.
+ *  - Import  (this will require a configurable source file).
+ *  - Tokens, both core country and field tokens.
+ *  - The country field, instance, widget and formatters. The field filters and
+ *    formatters need the most attention.
+ *  - Views integration.
+ *  - Apache Sol integration.
+ *  - Feeds integration.
+ */
+
+/**
+ * Test the node_load_multiple() function.
+ */
+class CountriesBaseSetupTest extends DrupalWebTestCase {
+  function setUp() {
+    parent::setUp(array('countries'));
+
+    // Create admin user and log in admin user.
+    $this->admin_user = $this->drupalCreateUser(array('administer site configuration'));
+    include_once DRUPAL_ROOT . '/includes/locale.inc';
+    include_once DRUPAL_ROOT . '/includes/iso.inc';
+  }
+
+  /**
+   * This should be called when you update any countries as entity_save() does
+   * not mean that the static caches are flushed.
+   */
+  function clearCountryEntityCache() {
+    drupal_static_reset('countries_countries_alter');
+    entity_get_controller('country')->resetCache();
+  }
+
+  /**
+   * Provides a sample group of countries defined by core that match the ISO
+   * Standards.
+   */
+  function getUnchangedCountries() {
+    return array(
+      'AD' => t('Andorra'),
+      'AF' => t('Afghanistan'),
+      'ZW' => t('Zimbabwe'),
+    );
+  }
+
+  /**
+   * Provides a sample group of countries defined by core that match the ISO
+   * Standards.
+   */
+  function getDisabledCountries() {
+    return array(
+      'AN' => t('Netherlands Antilles'),
+    );
+  }
+
+
+
+  /**
+   * These countries are not part of core.
+   */
+  function getNewCountries() {
+    return array(
+      'BQ' => t('Bonaire, Sint Eustatius and Saba'),
+      'SS' => t('South Sudan'),
+      'SX' => t('Sint Maarten (Dutch part)'),
+    );
+  }
+
+  /**
+   * These are the invalid strings in core.
+   */
+  function getNonStandardCountries() {
+    return array(
+      'AX' => t('Aland Islands'),
+      'BN' => t('Brunei'),
+      'BO' => t('Bolivia'),
+      'CD' => t('Congo (Kinshasa)'),
+      'CG' => t('Congo (Brazzaville)'),
+      'CI' => t('Ivory Coast'),
+      'FK' => t('Falkland Islands'),
+      'FM' => t('Micronesia'),
+      'IR' => t('Iran'),
+      'KP' => t('North Korea'),
+      'KR' => t('South Korea'),
+      'LA' => t('Laos'),
+      'MD' => t('Moldova'),
+      'MK' => t('Macedonia'),
+      'MO' => t('Macao S.A.R., China'),
+      'PS' => t('Palestinian Territory'),
+      'RE' => t('Reunion'),
+      'RU' => t('Russia'),
+      'SH' => t('Saint Helena'),
+      'TW' => t('Taiwan'),
+      'TZ' => t('Tanzania'),
+      'VA' => t('Vatican'),
+      'VE' => t('Venezuela'),
+      'VG' => t('British Virgin Islands'),
+      'VI' => t('U.S. Virgin Islands'),
+      'VN' => t('Vietnam'),
+    );
+  }
+  /**
+   * The valid list if ISO strings
+   */
+  function getNonStandardCountriesCorrected() {
+    return array(
+      'AX' => t('Åland Islands'),
+      'BN' => t('Brunei Darussalam'),
+      'BO' => t('Bolivia, Plurinational State of'),
+      'CD' => t('Congo, The Democratic Republic of the'),
+      'CG' => t('Congo'),
+      'CI' => t("Côte d'Ivoire"),
+      'FK' => t('Falkland Islands (Malvinas)'),
+      'FM' => t('Micronesia, Federated States of'),
+      'IR' => t('Iran, Islamic Republic of'),
+      'KP' => t("Korea, Democratic People's Republic of"),
+      'KR' => t('Korea, Republic of'),
+      'LA' => t("Lao People's Democratic Republic"),
+      'MD' => t('Moldova, Republic of'),
+      'MK' => t('Macedonia, The Former Yugoslav Republic of'),
+      'MO' => t('Macao'),
+      'PS' => t('Palestinian Territory, Occupied'),
+      'RE' => t('Réunion'),
+      'RU' => t('Russian Federation'),
+      'SH' => t('Saint Helena, Ascension and Tristan da Cunha'),
+      'TW' => t('Taiwan, Province of China'),
+      'TZ' => t('Tanzania, United Republic of'),
+      'VA' => t('Holy See (Vatican City State)'),
+      'VE' => t('Venezuela, Bolivarian Republic of'),
+      'VG' => t('Virgin Islands, British'),
+      'VI' => t('Virgin Islands, U.S.'),
+      'VN' => t('Viet Nam'),
+    );
+  }
+}
+
+class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Country overrides',
+      'description' => 'Test the installation and modification of the core country list.',
+      'group' => 'Countries',
+    );
+  }
+
+  function setUp() {
+    parent::setUp(array('countries'));
+    $this->drupalLogin($this->admin_user);
+  }
+
+  /**
+   * This browes the admin listing, making sure that the countries are correctly
+   * listed.
+   */
+  function testCountriesAdminListing() {
+    // Test all of the existing and updated countries via the countries module
+    // admin listing.
+
+    // INSTALLATION DOES NOT UPDATE BY DEFAULT!
+
+    $test_countries = array(
+      array('options' => array(),
+        'AF' => array('Afghanistan', 'Islamic Republic of Afghanistan', 'AFG', '004', 'Asia', 'Enabled'),
+        'IO' => array('British Indian Ocean Territory', 'British Indian Ocean Territory', 'IOT', '086', 'Asia', 'Enabled'),
+      ),
+      array('options' => array('query' => array('page' => '2')),
+        'CI' => array("Ivory Coast", "Republic of Côte d'Ivoire", 'CIV', '384', 'Africa', 'Enabled'),
+      ),
+      // <td id="CI-official_name">Republic of Côte d'Ivoire</td>
+      array(
+        'options' => array('query' => array('page' => '2', 'sort' => 'asc', 'order' => 'ISO numeric-3 code')),
+        'KP' => array("North Korea", "Democratic People's Republic of Korea", 'PRK', '408', 'Asia', 'Enabled'),
+      ),
+    );
+
+    foreach ($test_countries as $countries) {
+      $options = $countries['options'];
+      unset($countries['options']);
+      $this->drupalGet('admin/config/regional/countries', $options);
+      foreach ($countries as $iso2 => $info) {
+        $this->assertRaw('>' . check_plain($info[0]) . '</a>', 'Testing name ' . $info[0] . ' - ' . $iso2);
+        $this->assertRaw("<td id=\"{$iso2}-iso2\">{$iso2}</td>", 'Testing iso2 for ' . $info[0] . ' - ' . $iso2);
+        $this->assertRaw("<td id=\"{$iso2}-official_name\">" . check_plain($info[1]) . "</td>", 'Testing officical name for ' . $info[0] . ' - ' . $iso2 . " ({$info[1]})");
+        $this->assertRaw("<td id=\"{$iso2}-iso3\">{$info[2]}</td>", 'Testing iso3 for ' . $info[0] . ' - ' . $iso2 . " ({$info[2]})");
+        // Sorting adds an active class
+        $this->assertRaw(">{$info[3]}</td>", 'Testing numcode for ' . $info[0] . ' - ' . $iso2 . " ({$info[3]})");
+        $this->assertRaw("<td id=\"{$iso2}-continent\">{$info[4]}</td>", 'Testing continent for ' . $info[0] . ' - ' . $iso2 . " ({$info[4]})");
+        $this->assertRaw("<td id=\"{$iso2}-enabled\">{$info[5]}</td>", 'Testing enabled for ' . $info[0] . ' - ' . $iso2 . " ({$info[5]})");
+        $this->assertRaw('href="/admin/config/regional/countries/' . $iso2 . '?destination=', 'Edit link appear for core countries.');
+        $this->assertNoRaw('href="/admin/config/regional/countries/' . $iso2 . '/delete?destination=', 'No delete link appear for core countries.');
+      }
+    }
+  }
+
+  /**
+   * This browes the list of countries returned by Drupal to ensure that the
+   * module is correctly updating this.
+   */
+  function testCountriesCoreListingPreImport() {
+    // Parse and compare the default listings as returned by Drupal.
+    $unchanged_countries = $this->getUnchangedCountries();
+    // Stale core countries
+    $changed_countries_originals = $this->getNonStandardCountries();
+    // Updated core countries to the iso standards.
+    $changed_countries = $this->getNonStandardCountriesCorrected();
+    // New countries.
+    $new_countries = $this->getNewCountries();
+
+    // Check that things are still valid tests.
+    $core_tests = array_merge($unchanged_countries, $changed_countries_originals);
+
+    $countries = _country_get_predefined_list();
+    foreach ($core_tests as $iso2 => $name) {
+      if ($this->assertNotNull($countries[$iso2], 'Core country ' . $iso2 . ' - ' .  $name . ' defined')) {
+        $this->assertEqual($name, $countries[$iso2], 'Core country name ' .  $name . ' unchanged ' . $countries[$iso2]);
+      }
+    }
+    foreach ($new_countries as $iso2 => $name) {
+      $this->assertTrue(empty($countries[$iso2]), 'Countries new country ' .  $iso2 . ' - ' .  $name . ' not included in core');
+    }
+
+    // Now test that our updates are appearing.
+    $this->clearCountryEntityCache();
+    $countries = country_get_list();
+
+    foreach ($unchanged_countries as $iso2 => $name) {
+      if ($this->assertNotNull($countries[$iso2], 'Testing unmodified country ' .  $iso2 . ' - ' .  $name . ' exists')) {
+        $this->assertEqual($name, $countries[$iso2], 'Testing unmodified country ' .  $name . ' matches core drupal');
+      }
+    }
+    // INSTALLATION DOES NOT UPDATE BY DEFAULT!
+    foreach ($changed_countries as $iso2 => $name) {
+      if ($this->assertNotNull($countries[$iso2], 'Testing updated country ' .  $iso2 . ' - ' .  $name . ' exists')) {
+        $this->assertNotEqual($name, $countries[$iso2], 'Testing updated country ' .  $name . ' is not overriden by default');
+      }
+    }
+    foreach ($new_countries as $iso2 => $name) {
+      if ($this->assertTrue(!empty($countries[$iso2]), 'Testing new country ' .  $iso2 . ' - ' .  $name . ' exists')) {
+        $this->assertEqual($name, $countries[$iso2], 'Testing new country ' .  $name . ' matches new listing');
+      }
+    }
+
+  }
+
+  /**
+   * Tests the import routines.
+   */
+  function testCountriesCoreListingImport() {
+    // Parse and compare the default listings as returned by Drupal.
+    $unchanged_countries = $this->getUnchangedCountries();
+    // Stale core countries
+    $changed_countries_originals = $this->getNonStandardCountries();
+    // Updated core countries to the iso standards.
+    $changed_countries = $this->getNonStandardCountriesCorrected();
+    // New countries.
+    $new_countries = $this->getNewCountries();
+
+    // Visit update page and update the countries.
+
+    // Update Aland Islands to Åland Islands
+    // TODO: Remove - Debugging
+    $this->drupalGet('admin/config/regional/countries/import');
+
+    $edit = array("updates[AX-name]" => TRUE);
+    $this->drupalPost('admin/config/regional/countries/import', $edit, t('Import'));
+    $this->assertText(t('The updated countries were: ' . $changed_countries['AX']), 'Successful save message displayed.');
+
+    // Check the listings (it is on the first page).
+    $this->drupalGet('admin/config/regional/countries');
+    $this->assertRaw('<a href="/admin/config/regional/countries/AX?destination=admin/config/regional/countries">Åland Islands</a>',
+        'Testing Aland Islands update');
+
+    // Now test that our updates are appearing.
+    $this->clearCountryEntityCache();
+    $countries = country_get_list();
+    if ($this->assertNotNull($countries['AX'], 'Testing updated Aland Islands exists')) {
+      $this->assertEqual('Åland Islands', $countries['AX'], 'Testing updated Aland Islands renamed to Åland Islands');
+    }
+
+    // Test the only other standard property, AN disabled.
+    $this->assertNotNull($countries['AN'], 'Testing soon to be disabled Netherlands Antilles is in the country_get_list()');
+
+    $edit = array("updates[AN-enabled]" => TRUE);
+    $this->drupalPost('admin/config/regional/countries/import', $edit, t('Import'));
+    $this->assertText(t('The updated countries were: Netherlands Antilles'), 'Successful save message displayed.');
+
+    // Check the listings (it is on the first page).
+    $this->drupalGet('admin/config/regional/countries', array('query' => array('page' => '3')));
+    $this->assertRaw("<td id=\"AN-enabled\">Disabled</td>", 'Testing Netherlands Antilles is disabled');
+
+    // Now test that our updates are appearing.
+    $this->clearCountryEntityCache();
+    $countries = country_get_list();
+    $this->verbose(print_r($countries, 1));
+    $this->assertTrue(empty($countries['AN']), 'Testing disabled Netherlands Antilles not in country_get_list()');
+
+    // Import the rest.
+    unset($changed_countries['AX']);
+
+    // TODO: Remove - Debugging
+    $this->drupalGet('admin/config/regional/countries/import');
+
+    $edit = array();
+    foreach ($changed_countries as $iso => $name) {
+      $edit["updates[{$iso}-name]"] = TRUE;
+    }
+    $this->drupalPost('admin/config/regional/countries/import', $edit, t('Import'));
+
+    $this->clearCountryEntityCache();
+    $countries = country_get_list();
+    $this->verbose(print_r($countries, 1));
+    foreach ($this->getNonStandardCountriesCorrected() as $iso2 => $name) {
+      if ($this->assertNotNull($countries[$iso2], "Testing updated country {$name} exists")) {
+        $this->assertEqual($name, $countries[$iso2], "Testing updated country name is changed {$name}");
+      }
+    }
+    // Check that there are no more countries to import.
+    $this->drupalGet('admin/config/regional/countries/import');
+    $this->assertNoText(t('Import'), 'Import completed');
+  }
+
+}
+
+/**
+ * Test the general functions provided by the module.
+ */
+class CountriesFunctionsUnitTest extends CountriesBaseSetupTest {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Country core',
+      'description' => 'Test the country lookup functionality, querries and other core functions.',
+      'group' => 'Countries',
+    );
+  }
+
+
+  function setUp() {
+    parent::setUp();
+    $this->drupalLogin($this->admin_user);
+  }
+
+  /**
+   * This browes the admin listing, making sure that the countries are correctly
+   * listed.
+   */
+  function testCountriesLookupListing() {
+    // Complete list of checks using built in countries.
+    $countries = countries_get_countries();
+    $passed_all = TRUE;
+    foreach ($countries as $country) {
+      $passed = TRUE;
+      foreach (array('name', 'official_name', 'iso2', 'iso3', 'numcode') as $property) {
+        $value = $country->$property;
+        if (!empty($value)) {
+          // Fixed property
+          $lookup = countries_country_lookup($value, $property);
+          if (!$lookup || $lookup->iso2 != $country->iso2) {
+            $this->fail('Lookup found the ' . $country->iso2 . ' by property ' . $property);
+            $passed = FALSE;
+          }
+          // Guessing
+          $lookup = countries_country_lookup($value);
+          if (!$lookup || $lookup->iso2 != $country->iso2) {
+            $this->fail('Lookup found the ' . $country->iso2 . ' by guessing the property ' . $property);
+            $passed = FALSE;
+          }
+
+          if ($property == 'official_name') {
+            $lookup = countries_country_lookup($value, 'name');
+            if (!$lookup || $lookup->iso2 != $country->iso2) {
+              $this->fail('Lookup found the ' . $country->iso2 . ' by official name using name property');
+              $passed = FALSE;
+            }
+          }
+        }
+      }
+      if (!$passed) {
+        $this->fail('One of more property lookups for ' . $country->name . ' (' . $country->iso2 . ') failed');
+        $passed_all = FALSE;
+      }
+    }
+    if ($passed_all) {
+      $this->pass('All property lookups for all countries, both by property and guessing passed');
+    }
+
+    // Test some invalid properties using garbage values.
+    foreach (array('name', 'official_name', 'iso2', 'iso3', 'numcode', 'invalid') as $property) {
+      foreach (array('abcde', 'xc', 'XC', 0, FALSE, TRUE, NULL, -1, 1) as $invalid) {
+        try {
+          $lookup = countries_country_lookup($invalid, $property);
+          $this->assertFalse($lookup, 'Lookup not found by property ' . $property);
+        }
+        catch (Exception $e) {
+          if ($property == 'invalid') {
+            $this->pass('Invalid property correctly triggered an exception during countries_country_lookup()');
+          }
+          else {
+            $this->fail('Valid property incorrectly triggered an exception during countries_country_lookup()');
+          }
+        }
+
+        $lookup = countries_country_lookup($invalid);
+        $this->assertFalse($lookup, 'Lookup not found by guessing');
+      }
+    }
+
+    // TODO Imported countries, disabled countries
+  }
+
+  /**
+   * This test that core countries can not be deleted while user ones are.
+   */
+  function testCountriesLock() {
+    // Already have tested the lock above on the listing page.
+    $af = country_load('af');
+    $this->assertTrue(country_is_locked($af), 'Country is detected as locked');
+    $this->drupalGet('admin/config/regional/countries/af/delete');
+    $this->assertText(t('Core countries defined by the system can not be deleted.'), 'Checking that delete is disable for core country.');
+
+
+    $new = country_create(array(
+      'iso2' => 'XA',
+      'name' => 'A test XA',
+      'official_name' => 'A test XA official name'
+    ));
+    country_save($new);
+
+    $this->clearCountryEntityCache();
+    $new = country_load('xa');
+    $this->assertFALSE(country_is_locked($new), 'User country is not locked');
+    // Will be listed on page 1
+    $this->drupalGet('admin/config/regional/countries');
+    $this->assertRaw('href="/admin/config/regional/countries/XA/delete?destination=', 'Delete link appear for core countries.');
+    // Check the delete page
+    $this->drupalGet('admin/config/regional/countries/XA/delete');
+    $this->assertRaw(t('Are you sure you want to delete the country %country?', array('%country' => $new->name)));
+    $this->drupalPost('admin/config/regional/countries/XA/delete', array(), t('Delete'));
+
+    $this->assertRaw(t('Deleted country %country.', array('%country' => $new->name)));
+    $this->assertNoText($new->official_name, 'Delete link appear for core countries.');
+  }
+
+  /**
+   * This test that the country sort works.
+   */
+  function testCountriesSort() {
+    $strings = array(
+      'AA' => 'Zzz',
+      'AB' => 'Aaa',
+      'AC' => 'Åbc',
+      'AD' => 'Acd',
+    );
+    uasort($strings, 'countries_sort');
+    $this->assertEqual(implode('-', array_keys($strings)), 'AB-AC-AD-AA', 'Simple string sort');
+
+    $objects = array(
+      'AA' => country_create(array('name' => 'Aec', 'iso2' => 'aa')),
+      'AD' => country_create(array('name' => 'Abd', 'iso2' => 'ad')),
+      'AC' => country_create(array('name' => 'Åbc', 'iso2' => 'ac')),
+      'AB' => country_create(array('name' => 'Aba', 'iso2' => 'ab')),
+    );
+    uasort($objects, 'countries_sort');
+    $this->assertEqual(implode('-', array_keys($objects)), 'AB-AC-AD-AA', 'Simple object sort');
+  }
+
+  /**
+   * This test that the country property lookup is working.
+   */
+  function testCountriesPropertyLookup() {
+    // Defaults, all empty.
+    $country = country_create();
+    $results = array(
+      'cid' => NULL,
+      'iso2' => '',
+      'iso3' => '',
+      'name' => '',
+      'official_name' => '',
+      'continent' => t('Unknown'),
+      'continent_code' => 'UN',
+      'enabled' => t('Enabled'),
+      'numcode' => '',
+    );
+    $passed_all = TRUE;
+    foreach ($results as $key => $expected_results) {
+      $results = country_property($country, $key);
+      if ($results !== $expected_results) {
+        $this->fail('Country property failed on ' . $key . '. Found ' . $results . ', expected ' . $expected_results);
+        $passed_all = FALSE;
+      }
+    }
+    if ($passed_all) {
+      $this->pass('Country property lookup on default properties passed.');
+    }
+
+    // Defaults, all empty.
+    unset($country->continent);
+    unset($country->enabled);
+    $results = array(
+      'cid' => NULL,
+      'iso2' => 'xxx',
+      'iso3' => 'xxx',
+      'name' => 'xxx',
+      'official_name' => 'xxx',
+      'continent' => 'xxx',
+      'continent_code' => 'xxx',
+      'enabled' => t('Disabled'),
+      'numcode' => 'xxx',
+    );
+    $passed_all = TRUE;
+    foreach ($results as $key => $expected_results) {
+      $results = country_property($country, $key, 'xxx');
+      if ($results !== $expected_results) {
+        $this->fail('Country property using default failed on ' . $key . '. Found ' . $results . ', expected ' . $expected_results);
+        $passed_all = FALSE;
+      }
+    }
+    if ($passed_all) {
+      $this->pass('Country property lookup on default properties using fallback default all passed.');
+    }
+
+    // A test with as many nasties as the system allows via the UI.
+    $country = country_create(array(
+      'cid' => 9999,
+      'iso2' => 'XZ',
+      'iso3' => 'AAA',
+      'name' => '<a>&amp;Test</a>',
+      'official_name' => '<a>&amp;Test official</a>',
+      'continent' => 'NA',
+      'enabled' => 0,
+      'numcode' => '1',
+    ));
+    $results = array(
+      'cid' => '9999',
+      'iso2' => 'XZ',
+      'iso3' => 'AAA',
+      'name' => '<a>&amp;Test</a>',
+      'official_name' => '<a>&amp;Test official</a>',
+      'continent' => t('North America'),
+      'continent_code' => 'NA',
+      'enabled' => t('Disabled'),
+      'numcode' => '001',
+    );
+    $passed_all = TRUE;
+    foreach ($results as $key => $expected_results) {
+      $results = (string)country_property($country, $key);
+      if ($results !== check_plain($expected_results)) {
+        $this->fail('Country property failed on ' . $key . '. Found ' . $results . ', expected ' . $expected_results);
+        $passed_all = FALSE;
+      }
+      $results = (string)country_property($country, $key, 'xxx');
+      if ($results !== check_plain($expected_results)) {
+        $this->fail('Country property using default failed on ' . $key . '. Found ' . $results . ', expected ' . $expected_results);
+        $passed_all = FALSE;
+      }
+      $results = (string)country_property($country, $key, NULL, FALSE);
+      if ($results !== $expected_results) {
+        $this->fail('Country property failed on unsanitised results ' . $key . '. Found ' . check_plain($results) . ', expected ' . check_plain($expected_results));
+        $passed_all = FALSE;
+      }
+      $results = (string)country_property($country, $key, 'xxx', FALSE);
+      if ($results !== $expected_results) {
+        $this->fail('Country property failed on unsanitised results using default value ' . $key . '. Found ' . check_plain($results) . ', expected ' . check_plain($expected_results));
+        $passed_all = FALSE;
+      }
+    }
+    if ($passed_all) {
+      $this->pass('Country property lookup on populated country passed.');
+    }
+
+  }
+}
+
+/**
+ * Test the node_load_multiple() function.
+ */
+class CountriesCRUDUnitTest extends CountriesBaseSetupTest {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Country CRUD functions',
+      'description' => 'Test the country creation, editting, deletion, both programmatically and via the UI.',
+      'group' => 'Countries',
+    );
+  }
+
+
+  function setUp() {
+    parent::setUp();
+    $this->drupalLogin($this->admin_user);
+  }
+
+    /**
+   * This test that the country property lookup is working.
+   */
+  function testCountriesCRUD() {
+    // Try creating a new country that matches an existing one.
+    $country = country_create(array('iso2' => 'aF', 'name' => 'A test (XA)'));
+    if (country_validate($country)) {
+      $this->fail('Validation missed overriding an existing country.');
+    }
+    $country->iso2 = 'Xa';
+    if (country_validate($country)) {
+      $type = country_save($country);
+      if ($type != SAVED_NEW) {
+        $this->fail('Save failed.');
+      }
+    }
+    else {
+      $this->fail('Validation failed on valid new country.');
+    }
+    $this->verbose(print_r($country, 1));
+    $this->clearCountryEntityCache();
+    $new = country_load('XA');
+    $this->verbose(print_r($new, 1));
+    if ($this->assertTrue($new !== FALSE, 'Found and loaded new country')) {
+      $this->assertEqual($new->name, 'A test (XA)', 'Name saved correctly');
+      $this->assertEqual($new->official_name, '', 'Official name saved correctly');
+      $this->assertEqual($new->iso3, '', 'ISO alpha-3 saved correctly');
+      $this->assertEqual($new->numcode, 0, 'ISO numeric-3 saved correctly');
+      $this->assertEqual($new->continent, 'UN', 'Continent saved correctly');
+      $this->assertEqual($new->enabled, 1, 'Country is enabled');
+    }
+    if ($new) {
+      $new->name = 'A test';
+      $new->official_name = 'A test (XA)';
+      if (country_validate($country)) {
+        if (country_save($new) != SAVED_UPDATED) {
+          $this->fail('country_save() failed on valid country update.');
+        }
+        else {
+          $this->clearCountryEntityCache();
+          $new = country_load('XA');
+          if ($new->official_name != 'A test (XA)' || $new->name != 'A test') {
+            $this->fail('Country update failed.');
+          }
+          else {
+            $this->pass('Country update successful.');
+          }
+        }
+      }
+      else {
+        $this->fail('Validation failed on valid country update.');
+      }
+    }
+    if ($new = country_load('XA')) {
+      if (country_delete('XA') === FALSE) {
+        $this->fail('Country deletion likely failed.');
+      }
+    }
+    $this->clearCountryEntityCache();
+    $deleted = country_load('XA');
+    if ($deleted) {
+      $this->fail('Country deletion failed.');
+    }
+    else {
+      $this->pass('Country deletion successful.');
+    }
+  }
+
+}

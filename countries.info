@@ -7,6 +7,8 @@ files[] = views/views_handler_field_countries_continent.inc
 files[] = views/views_handler_filter_countries_continents_list.inc
 files[] = views/views_handler_filter_countries_list.inc
 files[] = countries.migrate.inc
+files[] = tests/countries.test
+
 configure = admin/config/regional/countries
 dependencies[] = entity
 recommends[] = countryicons
