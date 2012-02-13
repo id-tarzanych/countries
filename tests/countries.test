@@ -233,7 +233,6 @@ class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
       array('options' => array('query' => array('page' => '2')),
         'CI' => array("Ivory Coast", "Republic of Côte d'Ivoire", 'CIV', '384', 'Africa', 'Enabled'),
       ),
-      // <td id="CI-official_name">Republic of Côte d'Ivoire</td>
       array(
         'options' => array('query' => array('page' => '2', 'sort' => 'asc', 'order' => 'ISO numeric-3 code')),
         'KP' => array("North Korea", "Democratic People's Republic of Korea", 'PRK', '408', 'Asia', 'Enabled'),

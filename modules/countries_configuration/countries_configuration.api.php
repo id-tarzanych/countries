@@ -51,8 +51,8 @@ function hook_countries_configuration_options() {
  *   The machine name given to this country configuration set.
  * @param $info
  *   Additional info. Keyed elements are:
- *     country       - the country object or iso2 code
- *     is_new        - flag to see if there are any user data stored for this country
+ *     country       - the country object or iso2 code.
+ *     is_new        - flag to check if any data is stored for this country.
  *     load_defaults - flag to load default values.
  *                     This is used by the field settings to ensure that no
  *                     defaults are loaded into the Field UI area.
@@ -85,7 +85,7 @@ function example_address_country_admin_form($country, $values, &$form) {
   foreach (address_field_components() as $key => $info) {
     $form['labels'][$key] = array(
       '#type' => 'textfield',
-      '#title' => t('Label for !title', array('!title' => $info['name'])),
+      '#title' => t('Label for @title', array('@title' => $info['name'])),
       '#default_value' => $values['labels'][$key],
     );
   }
@@ -110,7 +110,8 @@ function example_address_country_admin_form_title($country) {
 /**
  * An example implementing how you would use the data saved.
  *
- * @param object $country
+ * @param $country
+ *   The country object to configure.
  */
 function example_address_country_configuration_usage($country) {
   // Depreciated: This will log a warning in the watchdog table and will be

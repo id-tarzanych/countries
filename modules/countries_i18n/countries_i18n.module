@@ -88,14 +88,14 @@ function countries_i18n_string_refresh() {
 /**
  * Helper function to help integrate with the i18n_strings module.
  *
- * @param $ios2
+ * @param $iso2
  *   The country iso2 code
  * @param $property
  *   The property to be translated
  * @param $string
  *   The raw db value for the given property
  * @param $langcode
- *   Optional language code if the code is different from the page requested one.
+ *   Optional language code to override the page requested one.
  * @param $textgroup
  *   Base group, defaults to 'countries'.
  */

@@ -73,6 +73,7 @@ function countries_menu() {
   );
   $items['admin/config/regional/countries/add'] = array(
     'title' => 'Add country',
+    'description' => 'Admin page to add a country.',
     'page callback' => 'countries_admin_page',
     'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_ACTION,
@@ -81,6 +82,7 @@ function countries_menu() {
   );
   $items['admin/config/regional/countries/import'] = array(
     'title' => 'Update countries',
+    'description' => 'Bulk import countries from the ISO standard.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('countries_admin_import_form'),
     'access arguments' => array('administer site configuration'),
@@ -89,11 +91,12 @@ function countries_menu() {
     'file' => 'countries.admin.inc',
   );
   $items['admin/config/regional/countries/%country'] = array(
+    'title callback' => 'countries_page_title',
+    'title arguments' => array(4),
+    'description' => 'Edit a country.',
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
     'page callback' => 'countries_admin_page',
     'page arguments' => array(4),
-    'title callback' => 'countries_page_title',
-    'title arguments' => array(4),
     'access arguments' => array('administer site configuration'),
     'file' => 'countries.admin.inc',
   );
@@ -104,6 +107,7 @@ function countries_menu() {
   );
   $items['admin/config/regional/countries/%country/delete'] = array(
     'title' => 'Delete country',
+    'description' => 'Country delete confirmation form.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('countries_admin_delete', 4),
     'access arguments' => array('administer site configuration'),
@@ -502,13 +506,13 @@ function countries_filter($countries, $filters = array()) {
 /**
  * Updates a Query object by adding country filters.
  *
- * @param SelectQuery $query
- *   The DB query object passed by reference.
+ * @param $query
+ *   The SelectQuery object passed by reference.
  *
- * @param array $filters
+ * @param $filters
  *   An array of country filters as defined in countries_filters().
  *
- * @param string $alias
+ * @param $alias
  *   The {countries} table alias.
  */
 function countries_filter_query_alter(&$query, $filters = array(), $alias = 'c') {

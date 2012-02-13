@@ -20,6 +20,7 @@ function countries_configuration_menu() {
   foreach ($config_options as $name => $info) {
     $items['admin/config/regional/countries/%country/' . $name] = array(
       'title' => $info['title'],
+      'description' => 'Country configuration form for ' . $info['title'],
       'type' => MENU_LOCAL_TASK,
       'page callback' => 'drupal_get_form',
       'page arguments' => array('countries_configuration_options_form', 4, $name),
@@ -32,6 +33,8 @@ function countries_configuration_menu() {
 }
 
 /**
+ * Wrapper to collect information from hook_countries_configuration_options().
+ *
  * Loads information about modules that rely on the countries module
  * to store country specific data.
  */
@@ -75,12 +78,12 @@ function countries_configuration($country, $name, $load_defaults = 1) {
 /**
  * Depreciated. Use countries_configuration() instead.
  *
- * TODO: Drop function in next branch.
+ * @todo Drop function in next branch.
  */
 function countries_load_configuration_options($country, $name, $load_defaults = 1) {
   // Log a watchdog warning to force future compatiability.
   $config_options = countries_configuration_options();
-  watchdog(WATCHDOG_WARNING, t('The function countries_load_configuration_options() is depreciated. Use countries_configuration() instead. Called by the @module module.'), array('@module' => $config_options[$name]['module']));
+  watchdog(WATCHDOG_WARNING, 'The function countries_load_configuration_options() is depreciated. Use countries_configuration() instead. Called by the @module module.', array('@module' => $config_options[$name]['module']));
   return countries_configuration($country, $name, $load_defaults);
 }
 
