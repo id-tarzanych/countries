@@ -178,6 +178,23 @@ function countries_admin_form($form, &$form_state, $country) {
  */
 function countries_admin_form_validate($form, &$form_state) {
   $country = (object) $form_state['values'];
+
+  // Added to provide a better UI experience. Decide to keep or drop.
+  if (!empty($country->iso2) && $existing = country_load($country->iso2)) {
+    // New country, the ISO alpha-2 must not be used.
+    if (empty($form['#country'])) {
+      form_set_error('iso2',
+        t('Another country was found with this ISO alpha-2 code; !link',
+        array('!link' => l(countries_t($existing),
+        'admin/config/regional/countries/' . $existing->iso2))));
+      return;
+    }
+    elseif ($existing->iso2 != $form['#country']->iso2) {
+      form_set_error('iso2', t('Another country was found with this ISO alpha-2 code; !link',
+        array('!link' => l(countries_t($existing), 'admin/config/regional/countries/' . $existing->iso2))));
+      return;
+    }
+  }
   if (country_validate($country)) {
     $form_state['values'] = (array) $country;
   }
@@ -527,14 +544,19 @@ function countries_property_invalid($property, &$value) {
  */
 function country_duplicate_field_check($country) {
   $duplicates = array();
+  $cid = empty($country->cid) ? FALSE : $country->cid;
   foreach (array('name', 'official_name', 'iso2', 'iso3', 'numcode') as $property) {
+
     if (drupal_strlen($country->$property)) {
       if ($property == 'numcode' && empty($country->$property)) {
         continue;
       }
+
       $query = db_select('countries_country', 'c')
-          ->fields('c', array('iso2'))
-          ->condition('iso2', $country->iso2, '!=');
+          ->fields('c', array('iso2'));
+      if ($cid) {
+        $query->condition('cid', $cid, '!=');
+      }
       if ($property == 'official_name' || $property == 'name') {
         $db_or = db_or();
         $db_or->condition('official_name', $country->$property)

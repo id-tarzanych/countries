@@ -143,6 +143,35 @@ class CountriesBaseSetupTest extends DrupalWebTestCase {
       'VN' => t('Viet Nam'),
     );
   }
+
+  function assertCountryListed($country, $sort = 'name') {
+    // This will generate all defaults.
+    $country = country_create((array) $country);
+    $country->iso2 = strtoupper($country->iso2);
+    $country->iso3 = strtoupper($country->iso3);
+//    $this->verbose(print_r($country, 1));
+    $this->assertRaw('>' . check_plain($country->name) . '</a>',
+        'Testing name ' . $country->name . ' - ' . $country->iso2);
+
+    foreach (array('iso2', 'official_name', 'numcode', 'enabled', 'iso3') as $property) {
+      $additional = $sort == $property ? 'class="active" ' : '';
+      $value = country_property($country, $property, '');
+//      $this->verbose(check_plain("<td {$additional}id=\"{$country->iso2}-{$property}\">{$value}</td>"));
+      $this->assertRaw("<td {$additional}id=\"{$country->iso2}-{$property}\">{$value}</td>",
+          "Testing {$property} for {$country->name} ($country->iso2): {$value}");
+    }
+
+    $this->assertRaw('href="/admin/config/regional/countries/' . $country->iso2 . '?destination=',
+        'Edit link appears core countries.');
+
+    $delete_text = 'href="/admin/config/regional/countries/' . $country->iso2 . '/delete?destination=';
+    if (country_is_locked($country)) {
+      $this->assertNoRaw($delete_text, 'No delete link appear for core countries.');
+    }
+    else {
+      $this->assertRaw($delete_text, 'Delete link appear for non-core countries.');
+    }
+  }
 }
 
 class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
@@ -303,7 +332,6 @@ class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
     // Now test that our updates are appearing.
     $this->clearCountryEntityCache();
     $countries = country_get_list();
-    $this->verbose(print_r($countries, 1));
     $this->assertTrue(empty($countries['AN']), 'Testing disabled Netherlands Antilles not in country_get_list()');
 
     // Import the rest.
@@ -320,7 +348,6 @@ class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
 
     $this->clearCountryEntityCache();
     $countries = country_get_list();
-    $this->verbose(print_r($countries, 1));
     foreach ($this->getNonStandardCountriesCorrected() as $iso2 => $name) {
       if ($this->assertNotNull($countries[$iso2], "Testing updated country {$name} exists")) {
         $this->assertEqual($name, $countries[$iso2], "Testing updated country name is changed {$name}");
@@ -591,7 +618,7 @@ class CountriesCRUDUnitTest extends CountriesBaseSetupTest {
   public static function getInfo() {
     return array(
       'name' => 'Country CRUD functions',
-      'description' => 'Test the country creation, editting, deletion, both programmatically and via the UI.',
+      'description' => 'Test the country creation, editting, deletion programmatically.',
       'group' => 'Countries',
     );
   }
@@ -621,10 +648,8 @@ class CountriesCRUDUnitTest extends CountriesBaseSetupTest {
     else {
       $this->fail('Validation failed on valid new country.');
     }
-    $this->verbose(print_r($country, 1));
     $this->clearCountryEntityCache();
     $new = country_load('XA');
-    $this->verbose(print_r($new, 1));
     if ($this->assertTrue($new !== FALSE, 'Found and loaded new country')) {
       $this->assertEqual($new->name, 'A test (XA)', 'Name saved correctly');
       $this->assertEqual($new->official_name, '', 'Official name saved correctly');
@@ -670,4 +695,190 @@ class CountriesCRUDUnitTest extends CountriesBaseSetupTest {
     }
   }
 
+}
+
+
+/**
+ * Test the node_load_multiple() function.
+ */
+class CountriesCRUDUIUnitTest extends CountriesBaseSetupTest {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Country administration UI',
+      'description' => 'Test the country creation, editting, deletion via the admin UI.',
+      'group' => 'Countries',
+    );
+  }
+
+
+  function setUp() {
+    parent::setUp();
+    $this->drupalLogin($this->admin_user);
+  }
+
+    /**
+   * This test that the country property lookup is working.
+   */
+  function testCountriesAddition() {
+    // A basic country with minimal requirements.
+    $edit = array(
+      'iso2' => 'xa',
+      'name' => 'A test country (xa)',
+    );
+    $this->drupalPost('admin/config/regional/countries/add', $edit, t('Save'));
+    $this->assertRaw(t('Added country %country.', array('%country' => 'A test country (xa)')), 'New country was added');
+    $this->assertCountryListed($edit, 'name');
+
+    // An invalid country
+    $edit = array(
+      'iso2' => '12', // not alpha-numerical
+      'name' => 'New Zealand', // duplicate
+      'official_name' => 'Aruba', // duplicate
+      'iso3' => 'qw$', // special char
+      'numcode' => '-1' // negative
+    );
+    $this->drupalPost('admin/config/regional/countries/add', $edit, t('Save'));
+    $this->assertNoRaw(t('Added country %country.', array('%country' => 'New Zealand')), 'New country was not added (validation)');
+
+    // Individually test the invalid properties.
+    $valid_country = country_create(array(
+      'iso2' => 'xb',
+      'name' => 'A test xb',
+      'official_name' => 'Official test for xb',
+      'iso3' => 'Xab',
+      'numcode' => '901',
+    ));
+    unset($valid_country->cid);
+    $invalid_properties = array(
+      'iso2' => array(
+        '12', // numerical
+        '', // empty
+        '$s', // special char
+        'au', // duplicate
+        'd', // single property
+        'ddd', // too long
+      ),
+      'name' => array(
+        '', // empty
+        'Australia', // duplicate
+        'aUstralia', // duplicate, different case
+        'Kingdom of Bahrain', // duplicate from official name column
+        'kingdom Of Bahrain', // duplicate from official name column, different case
+        'Tooo long 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789', // too long
+      ),
+      'official_name' => array(
+        'Bahrain', // duplicate from name column
+        'BahraiN', // duplicate from name column, different case
+        'Kingdom of Bahrain', // duplicate from official name column
+        'kingdom Of Bahrain', // duplicate from official name column, different case
+        'Tooo long 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789', // too long
+      ),
+      'iso3' => array(
+        '123', // numerical
+        '$ss', // special char
+        'aus', // duplicate
+        'd', // single char
+        'dc', // double char
+        'xaaa', // too long
+      ),
+      'numcode' => array(
+        '1001', // too big
+        '-1', // too small
+        '-12', // too small
+        '-123', // too small
+        '$23', // special char
+        '23#', // special char
+        '048', // duplicate
+        '4', // duplicate
+        '04', // duplicate
+      ),
+    );
+
+    foreach ($invalid_properties as $property => $values) {
+      foreach ($values as $value) {
+        $test = clone $valid_country;
+        $test->$property = $value;
+        $this->drupalPost('admin/config/regional/countries/add', (array)$test, t('Save'));
+        $this->assertNoRaw(t('Added country %country.', array('%country' => $test->name)), 'New country was not added (validation)');
+      }
+    }
+
+    // Try and edit the first country
+    $country = country_load('xa');
+    $this->drupalPost('admin/config/regional/countries/xa', array(
+      'numcode' => 905,
+      'continent' => 'NA',
+      ), t('Save'));
+    $this->clearCountryEntityCache();
+    $editted = country_load('xa');
+    $this->assertEqual($editted->numcode, 905, 'Country edit: Test number code');
+    $this->assertEqual($editted->continent, 'NA', 'Country edit: Test continent');
+    $this->drupalPost('admin/config/regional/countries/xa', array(
+      'iso2' => 'Xb',
+      'iso3' => 'xbc',
+      'numcode' => 910,
+      'name' => 'A test for xa to xb',
+      'continent' => 'SA',
+      'enabled' => FALSE,
+      'official_name' => 'A test for xa to xb official',
+    ), t('Save'));
+    $this->clearCountryEntityCache();
+    $editted = country_load('xb');
+    if ($this->assertTrue(!empty($editted), 'Test loading by new iso alpha-2 code')) {
+      $this->assertEqual($editted->iso2, 'XB', 'Country edit: Test iso2');
+      $this->assertEqual($editted->iso3, 'XBC', 'Country edit: Test iso3');
+      $this->assertEqual($editted->numcode, 910, 'Country edit: Test numeric code');
+      $this->assertEqual($editted->name, 'A test for xa to xb', 'Country edit: Test name');
+      $this->assertEqual($editted->official_name, 'A test for xa to xb official', 'Country edit: Test official name');
+      $this->assertEqual($editted->enabled, 0, 'Country edit: Test enabled');
+      $this->assertEqual($editted->continent, 'SA', 'Country edit: Test continent');
+      $this->clearCountryEntityCache();
+      $old = country_load('xa');
+      $this->assertTrue(empty($old), 'Previous instance is no longer available');
+    }
+
+    // Try to delete core countries.
+    $this->drupalGet('admin/config/regional/countries/TT/delete');
+    $this->assertText(t('Core countries defined by the system can not be deleted.'), 'Core country deletion failed');
+
+    $this->drupalGet('admin/config/regional/countries/xx/delete');
+    $this->assertResponse(404, 'Can not delete fake countries.');
+
+    $this->drupalPost('admin/config/regional/countries/xb/delete', array(), t('Delete'));
+    $this->assertRaw(t('Deleted country %country.', array('%country' => $editted->name)), 'Custom country was deleted');
+    $this->clearCountryEntityCache();
+    $editted = country_load('xb');
+    $this->assertTrue(empty($editted), 'Custom country was really deleted.');
+  }
+
+  /**
+   * Special case where the ISO matches an existing ISO code.
+   *
+   * If the same country is added twice, there are multiple errors generated due
+   * to the ISO alpha-2 conflict.
+   */
+  function testISO2Conflict() {
+    $oz = country_load('au');
+    $edit = array();
+    foreach (countries_core_properties() as $key => $label) {
+      $edit[$key] = $oz->$key;
+    }
+    $this->drupalPost('admin/config/regional/countries/add', $edit, t('Save'));
+    $this->assertNoRaw(t('Added country %country.', array('%country' => $oz->name)), 'New country was not added (iso2 validation)');
+    $this->assertRaw(t('Another country was found with this ISO alpha-2 code; !link',
+        array('!link' => l(countries_t($oz), 'admin/config/regional/countries/' . $oz->iso2))),
+        'New country was not added (iso2 validation)');
+
+    $nz = country_load('nz');
+    $edit = array();
+    foreach (countries_core_properties() as $key => $label) {
+      $edit[$key] = $nz->$key;
+    }
+    $edit['iso2'] = 'au';
+    $this->drupalPost('admin/config/regional/countries/add', $edit, t('Save'));
+    $this->assertRaw(t('Another country was found with this ISO alpha-2 code; !link',
+        array('!link' => l(countries_t($oz), 'admin/config/regional/countries/' . $oz->iso2))),
+        'New country was not added (iso2 validation)');
+  }
 }

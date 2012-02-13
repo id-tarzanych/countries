@@ -299,7 +299,8 @@ function countries_get_country($iso2) {
 /**
  * Validates a country.
  *
- * Validates and normalises the core country properties.
+ * Validates and normalises the core country properties. Note that this requires
+ * the cid to test updates valids correctly.
  *
  * @code
  *   if (country_validate($country)) {
