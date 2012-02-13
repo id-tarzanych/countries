@@ -234,9 +234,10 @@ function countries_update_7200() {
 }
 
 /**
- * This drops the unique indexes on the official name, ISO3 and NumCode. These
- * fields are not required, so this will lead to PDO exceptions if two or more
- * countries have these fields left blank.
+ * This drops the unique indexes on the official name, ISO3 and NumCode.
+ *
+ * These fields are not required, so this will lead to PDO exceptions if two or
+ * more countries have these fields left blank.
  */
 function countries_update_7202() {
   db_drop_unique_key('countries_country', 'iso3');
@@ -261,7 +262,7 @@ function countries_update_7203() {
           if (!empty($instance['display'])) {
             foreach ($instance['display'] as $view_mode => &$display) {
               if (strpos($display['type'], 'country_countryicons_') === 0) {
-                list(,, $icon_type, $icon_set_name) = explode('_', $display['type'], 4);
+                list(, , $icon_type, $icon_set_name) = explode('_', $display['type'], 4);
                 $property = '';
                 if ($icon_type == 'imagename') {
                   $property = 'name';

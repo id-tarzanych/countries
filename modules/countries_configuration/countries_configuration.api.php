@@ -6,8 +6,7 @@
  */
 
 /**
- * Provides the form settings for integrating with the countries configuration
- * module.
+ * Form settings for integrating with the countries configuration module.
  *
  * This API allows multiple forms per module.
  */
@@ -41,6 +40,8 @@ function hook_countries_configuration_options() {
 }
 
 /**
+ * An alter hook for hook_countries_configuration_options().
+ *
  * Provides a hook into dynamically changing the settings provided by
  * hook_countries_configuration_options() in relation to a country.
  *

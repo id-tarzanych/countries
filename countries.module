@@ -394,8 +394,7 @@ function country_delete($iso2) {
 }
 
 /**
- * Helper function to check if the country is defined by Drupal. These countries
- * are never deleted, but they can be disabled.
+ * The module locks a country record if it is defined internally by Drupal.
  *
  * @param $country
  *   The country object.
@@ -424,7 +423,7 @@ function countries_get_continents() {
   $continents = &drupal_static(__FUNCTION__, array());
   if (empty($continents)) {
     $continents = variable_get('countries_continents', countries_get_default_continents());
-    // TODO: I18n for user defined overrides.
+    // @todo I18n for user defined overrides.
     uasort($continents, 'countries_sort');
   }
   return $continents;
@@ -449,9 +448,14 @@ function countries_get_default_continents() {
 }
 
 /**
- * A helper function to filter country lists. This is preferably called using
- * countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED)). If
- * the country code is not found in the database, the country will be excluded.
+ * A helper function to filter country lists.
+ *
+ * If the country code is not found in the database, the country will be not be
+ * return by this function. This is preferably called using:
+ *
+ * @code
+ * countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED)).
+ * @endcode
  *
  * @param array $countries
  *   An array indexed by ISO2 country value. The actual value held in the array
@@ -496,11 +500,11 @@ function countries_filter($countries, $filters = array()) {
 }
 
 /**
- * Accepts an Query object that is joined to the countries table using the
- * table prefix.
+ * Updates a Query object by adding country filters.
  *
  * @param SelectQuery $query
  *   The DB query object passed by reference.
+ *
  * @param array $filters
  *   An array of country filters as defined in countries_filters().
  *
@@ -559,11 +563,7 @@ function countries_transliterate($word) {
 }
 
 /**
- * This is a helper function to invoke other modules implementations of
- * hook_countries_alter() when showing the country FAPI elements and fields.
- *
- * Since we are parsing the countries from the database, we can avoid loading
- * the iso.inc file directly.
+ * Invoke hook_countries_alter() while bypassing the Countries module.
  */
 function countries_invoke_additional_countries_alter(&$countries) {
   foreach (module_implements('countries_alter') as $module) {
@@ -658,8 +658,8 @@ function countries_core_properties() {
  * @param $sanitize
  *   Boolean to indicate whether an HTML safe version is required.
  *
- * @return
- *   String representation of the property.
+ * @return $property
+ *   Integer cid or string representation of other properties.
  */
 function country_property($country, $property, $default = NULL, $sanitize = TRUE) {
   $output = NULL;
@@ -718,9 +718,14 @@ function country_property($country, $property, $default = NULL, $sanitize = TRUE
  * A helper function to find a country based on any country property.
  *
  * @param $value
+ *   Search keyword to find a country for.
+ *
  * @param $property
  *   The country property to search with. If empty, the code will attempt to
  *   guess what property the user is looking for. This is not recommended!
+ *
+ * @return $country
+ *   The loaded country or FALSE if no match was found.
  */
 function countries_country_lookup($value, $property = NULL) {
   if (empty($value)) {
@@ -789,8 +794,7 @@ function  _countries_estimate_property_type($value) {
 }
 
 /**
- * Custom theming function to convert the ISO numeric-3 codes to a '0' padded
- * string.
+ * Themes ISO numeric-3 codes to a '0' padded string three characters long.
  */
 function theme_countries_number($variables) {
   if (isset($variables['country']) && !empty($variables['country']->numcode)) {
@@ -800,8 +804,7 @@ function theme_countries_number($variables) {
 }
 
 /**
- * This renders a conditional formatter that is based on the country icon
- * module.
+ * Theming function for the Country Icon (country_icon) country field formatter.
  */
 function theme_country_icon_adapter($variables) {
   $country = $variables['country'];

@@ -144,12 +144,16 @@ class CountriesBaseSetupTest extends DrupalWebTestCase {
     );
   }
 
-  function assertListingLink($country, $type, $assertTrue = TRUE, $message = NULL) {
+  function assertListingLink($country, $type, $assertTrue = TRUE, $message = NULL, $query = array()) {
     if (!isset($message)) {
       $t_args = array('@country' => $country->name, '@iso2' => $country->iso2, '!type' => $type);
       $message = t('Testing that the country @country (@iso2) !type link was found', $t_args);
     }
-    $options = array('query' => array('destination' => 'admin/config/regional/countries'));
+    $destination = 'admin/config/regional/countries';
+    if (!empty($query)) {
+      $destination .= '?' . drupal_http_build_query($query);
+    }
+    $options = array('query' => array('destination' => $destination));
     switch ($type) {
       case 'title':
         $link = l($country->name, 'admin/config/regional/countries/' . $country->iso2, $options);
@@ -242,7 +246,8 @@ class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
       $this->drupalGet('admin/config/regional/countries', $options);
       foreach ($countries as $iso2 => $info) {
         $test_country = country_create(array('iso2' => $iso2, 'name' => $info[0]));
-        $this->assertListingLink($test_country, 'title', 1);
+        $existing = country_load($iso2);
+        $this->assertListingLink($test_country, 'title', 1, NULL, empty($options['query']) ? NULL : $options['query']);
         $this->assertRaw("<td id=\"{$iso2}-iso2\">{$iso2}</td>", 'Testing iso2 for ' . $info[0] . ' - ' . $iso2);
         $this->assertRaw("<td id=\"{$iso2}-official_name\">" . check_plain($info[1]) . "</td>", 'Testing officical name for ' . $info[0] . ' - ' . $iso2 . " ({$info[1]})");
         $this->assertRaw("<td id=\"{$iso2}-iso3\">{$info[2]}</td>", 'Testing iso3 for ' . $info[0] . ' - ' . $iso2 . " ({$info[2]})");
@@ -251,10 +256,26 @@ class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
         $this->assertRaw("<td id=\"{$iso2}-continent\">{$info[4]}</td>", 'Testing continent for ' . $info[0] . ' - ' . $iso2 . " ({$info[4]})");
         $this->assertRaw("<td id=\"{$iso2}-enabled\">{$info[5]}</td>", 'Testing enabled for ' . $info[0] . ' - ' . $iso2 . " ({$info[5]})");
 
-        $this->assertListingLink($test_country, 'edit', 1);
-        $this->assertListingLink($test_country, 'delete', 0);
+        $this->assertListingLink($test_country, 'edit', 1, NULL, empty($options['query']) ? NULL : $options['query']);
+        $this->assertListingLink($test_country, 'delete', 0, NULL, empty($options['query']) ? NULL : $options['query']);
       }
     }
+  }
+}
+
+class CountriesBaseImportUnitTest extends CountriesBaseSetupTest {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Country imports from CSV file',
+      'description' => 'Test the import functions.',
+      'group' => 'Countries',
+    );
+  }
+
+  function setUp() {
+    parent::setUp(array('countries'));
+    $this->drupalLogin($this->admin_user);
   }
 
   /**
