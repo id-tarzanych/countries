@@ -4,7 +4,7 @@
  * @file
  * Defines all element related code for the countries module.
  *
- * TODO: Find a better way of removing the process, value and validation
+ * @todo Find a better way of removing the process, value and validation
  * callbacks into this file without needing the includes in the main module
  * file.
  */
@@ -90,7 +90,7 @@ function _countries_country_expand($element) {
   // Allow other modules to update this list.
   countries_invoke_additional_countries_alter($element['#options']);
 
-  // TODO: This appears to be overridden via core now. Test and remove.
+  // @todo This appears to be overridden via core now. Test and remove.
   // If not required, add a none option. This can be overridden via setting
   // the $element['#empty_value'] parameter to NULL.
   if (empty($element['#required']) && !isset($element['#empty_value'])) {

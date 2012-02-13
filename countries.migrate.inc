@@ -14,7 +14,7 @@ class MigrateCountryFieldHandler extends MigrateFieldHandler {
     $language = $this->getFieldLanguage($entity, $field_info, $arguments);
     $delta = 0;
 
-    foreach($values as $value) {
+    foreach ($values as $value) {
       $return[$language][$delta]['iso2'] = $value;
       $delta++;
     }

@@ -199,7 +199,7 @@ function countries_admin_form_validate($form, &$form_state) {
     $form_state['values'] = (array) $country;
   }
   else {
-    foreach($country->_errors as $property => $error_message) {
+    foreach ($country->_errors as $property => $error_message) {
       form_set_error($property, $error_message);
     }
   }
@@ -430,7 +430,7 @@ function countries_csv_updates($file = NULL) {
     'iso2' => '',
     'iso3' => '',
     'numcode' => 0,
-		'continent' => 'UN',
+    'continent' => 'UN',
   );
   $countries = array();
 
@@ -560,7 +560,7 @@ function country_duplicate_field_check($country) {
       if ($property == 'official_name' || $property == 'name') {
         $db_or = db_or();
         $db_or->condition('official_name', $country->$property)
-             ->condition('name', $country->$property);
+            ->condition('name', $country->$property);
         $query->condition($db_or);
       }
       else {

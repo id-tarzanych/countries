@@ -234,7 +234,9 @@ function countries_update_7200() {
 }
 
 /**
- * This drops the unique indexes on the official name, ISO3 and NumCode. These fields are not required, so this will lead to PDO exceptions if two or more countries have these fields left blank.
+ * This drops the unique indexes on the official name, ISO3 and NumCode. These
+ * fields are not required, so this will lead to PDO exceptions if two or more
+ * countries have these fields left blank.
  */
 function countries_update_7202() {
   db_drop_unique_key('countries_country', 'iso3');
@@ -243,8 +245,7 @@ function countries_update_7202() {
 }
 
 /**
- * This updates the display settings to handle the new singular country icon
- * formatter.
+ * This updates the display settings to handle the new singular icon formatter.
  */
 function countries_update_7203() {
   if (!module_exists('countryicons')) {
@@ -287,8 +288,9 @@ function countries_update_7203() {
 }
 
 /**
- * Informs the user about the latest round of name changes. The name field is
- * 100% in sync with the ISO standard with this release.
+ * Informs the user about the latest round of name changes.
+ *
+ * The name field is 100% in sync with the ISO standard with this release.
  */
 function countries_update_7204() {
   $t = get_t();

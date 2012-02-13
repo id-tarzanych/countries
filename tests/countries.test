@@ -144,32 +144,54 @@ class CountriesBaseSetupTest extends DrupalWebTestCase {
     );
   }
 
+  function assertListingLink($country, $type, $assertTrue = TRUE, $message = NULL) {
+    if (!isset($message)) {
+      $t_args = array('@country' => $country->name, '@iso2' => $country->iso2, '!type' => $type);
+      $message = t('Testing that the country @country (@iso2) !type link was found', $t_args);
+    }
+    $options = array('query' => array('destination' => 'admin/config/regional/countries'));
+    switch ($type) {
+      case 'title':
+        $link = l($country->name, 'admin/config/regional/countries/' . $country->iso2, $options);
+        break;
+
+      case 'edit':
+        $link = l(t('edit'), 'admin/config/regional/countries/' . $country->iso2, $options);
+        break;
+
+      case 'delete':
+        $link = l(t('delete'), 'admin/config/regional/countries/' . $country->iso2 . '/delete', $options);
+        break;
+    }
+    if ($assertTrue) {
+      $this->assertRaw($link, $message);
+    }
+    else {
+      $this->assertNoRaw($link, $message);
+    }
+  }
+
   function assertCountryListed($country, $sort = 'name') {
+    $country = (object) $country;
     // This will generate all defaults.
     $country = country_create((array) $country);
     $country->iso2 = strtoupper($country->iso2);
     $country->iso3 = strtoupper($country->iso3);
-//    $this->verbose(print_r($country, 1));
-    $this->assertRaw('>' . check_plain($country->name) . '</a>',
-        'Testing name ' . $country->name . ' - ' . $country->iso2);
+
+    $this->assertListingLink($country, 'title', 1);
 
     foreach (array('iso2', 'official_name', 'numcode', 'enabled', 'iso3') as $property) {
       $additional = $sort == $property ? 'class="active" ' : '';
       $value = country_property($country, $property, '');
-//      $this->verbose(check_plain("<td {$additional}id=\"{$country->iso2}-{$property}\">{$value}</td>"));
       $this->assertRaw("<td {$additional}id=\"{$country->iso2}-{$property}\">{$value}</td>",
           "Testing {$property} for {$country->name} ($country->iso2): {$value}");
     }
-
-    $this->assertRaw('href="/admin/config/regional/countries/' . $country->iso2 . '?destination=',
-        'Edit link appears core countries.');
-
-    $delete_text = 'href="/admin/config/regional/countries/' . $country->iso2 . '/delete?destination=';
+    $this->assertListingLink($country, 'edit', 1);
     if (country_is_locked($country)) {
-      $this->assertNoRaw($delete_text, 'No delete link appear for core countries.');
+      $this->assertListingLink($country, 'delete', 0);
     }
     else {
-      $this->assertRaw($delete_text, 'Delete link appear for non-core countries.');
+      $this->assertListingLink($country, 'delete', 1);
     }
   }
 }
@@ -219,7 +241,8 @@ class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
       unset($countries['options']);
       $this->drupalGet('admin/config/regional/countries', $options);
       foreach ($countries as $iso2 => $info) {
-        $this->assertRaw('>' . check_plain($info[0]) . '</a>', 'Testing name ' . $info[0] . ' - ' . $iso2);
+        $test_country = country_create(array('iso2' => $iso2, 'name' => $info[0]));
+        $this->assertListingLink($test_country, 'title', 1);
         $this->assertRaw("<td id=\"{$iso2}-iso2\">{$iso2}</td>", 'Testing iso2 for ' . $info[0] . ' - ' . $iso2);
         $this->assertRaw("<td id=\"{$iso2}-official_name\">" . check_plain($info[1]) . "</td>", 'Testing officical name for ' . $info[0] . ' - ' . $iso2 . " ({$info[1]})");
         $this->assertRaw("<td id=\"{$iso2}-iso3\">{$info[2]}</td>", 'Testing iso3 for ' . $info[0] . ' - ' . $iso2 . " ({$info[2]})");
@@ -227,8 +250,9 @@ class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
         $this->assertRaw(">{$info[3]}</td>", 'Testing numcode for ' . $info[0] . ' - ' . $iso2 . " ({$info[3]})");
         $this->assertRaw("<td id=\"{$iso2}-continent\">{$info[4]}</td>", 'Testing continent for ' . $info[0] . ' - ' . $iso2 . " ({$info[4]})");
         $this->assertRaw("<td id=\"{$iso2}-enabled\">{$info[5]}</td>", 'Testing enabled for ' . $info[0] . ' - ' . $iso2 . " ({$info[5]})");
-        $this->assertRaw('href="/admin/config/regional/countries/' . $iso2 . '?destination=', 'Edit link appear for core countries.');
-        $this->assertNoRaw('href="/admin/config/regional/countries/' . $iso2 . '/delete?destination=', 'No delete link appear for core countries.');
+
+        $this->assertListingLink($test_country, 'edit', 1);
+        $this->assertListingLink($test_country, 'delete', 0);
       }
     }
   }
@@ -308,8 +332,9 @@ class CountriesBaseInstallUnitTest extends CountriesBaseSetupTest {
 
     // Check the listings (it is on the first page).
     $this->drupalGet('admin/config/regional/countries');
-    $this->assertRaw('<a href="/admin/config/regional/countries/AX?destination=admin/config/regional/countries">Åland Islands</a>',
-        'Testing Aland Islands update');
+
+    $country = country_create(array('iso2' => 'AX', 'name' => 'Åland Islands'));
+    $this->assertListingLink($country, 'title');
 
     // Now test that our updates are appearing.
     $this->clearCountryEntityCache();
@@ -470,7 +495,9 @@ class CountriesFunctionsUnitTest extends CountriesBaseSetupTest {
     $this->assertFALSE(country_is_locked($new), 'User country is not locked');
     // Will be listed on page 1
     $this->drupalGet('admin/config/regional/countries');
-    $this->assertRaw('href="/admin/config/regional/countries/XA/delete?destination=', 'Delete link appear for core countries.');
+
+    $this->assertListingLink($new, 'delete', 1);
+
     // Check the delete page
     $this->drupalGet('admin/config/regional/countries/XA/delete');
     $this->assertRaw(t('Are you sure you want to delete the country %country?', array('%country' => $new->name)));
