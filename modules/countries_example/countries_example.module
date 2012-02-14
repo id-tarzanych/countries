@@ -3,6 +3,8 @@
 /**
  * @file
  * Provides examples for the Countries module.
+ *
+ * This is also used during testing to test the FAPI country element.
  */
 
 /**
@@ -11,7 +13,7 @@
 function countries_example_menu() {
   $items = array();
 
-  $items['countries_example'] = array(
+  $items['countries-example'] = array(
     'title' => 'Countries example page',
     'description' => 'Demonstrate countries API',
     'page callback' => 'drupal_get_form',
@@ -92,7 +94,7 @@ function countries_example($form, &$form_state) {
 
   $form['countries_example_default_country_5'] = array(
     '#type' => 'country',
-    '#title' => 'Select countries (country element)',
+    '#title' => t('Select countries (country element)'),
     '#default_value' => variable_get('countries_example_default_country_5', ''),
     '#multiple' => TRUE,
     '#size' => 5,
@@ -101,7 +103,7 @@ function countries_example($form, &$form_state) {
 
   $form['countries_example_default_country_6'] = array(
     '#type' => 'country',
-    '#title' => 'Select European countries (country element)',
+    '#title' => t('Select European countries (country element)'),
     '#size' => 5,
     '#multiple' => TRUE,
     '#default_value' => variable_get('countries_example_default_country_6', ''),
@@ -113,7 +115,7 @@ function countries_example($form, &$form_state) {
 
   $form['countries_example_default_country_7'] = array(
     '#type' => 'country',
-    '#title' => 'Select one to three countries in America (country element)',
+    '#title' => t('Select one to three countries in America (country element)'),
     '#size' => 8,
     '#required' => TRUE,
     '#cardinality' => 3,
@@ -127,8 +129,7 @@ function countries_example($form, &$form_state) {
 
   $form['countries_example_default_country_8'] = array(
     '#type' => 'country',
-    '#title' => 'Select a disabled country',
-    '#required' => FALSE,
+    '#title' => t('Select a disabled country'),
     '#default_value' => variable_get('countries_example_default_country_8', ''),
     // This is core Drupal 7 functionality
     '#empty_option' => t('-- None selected --'),
