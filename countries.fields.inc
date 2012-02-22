@@ -30,7 +30,19 @@ function countries_field_info() {
  */
 function countries_field_info_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
+  // Do not use the type "country" here because that would reference the entity
+  // type.
+  $property['type'] = ($field['cardinality'] != 1) ? 'list<countries>' : 'countries';
   $property['getter callback'] = 'countries_entity_metadata_field_property_get';
+  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
+  $property['auto creation'] = 'entity_property_create_array';
+  $property['property info'] = array(
+    'iso2' => array(
+      'label' => t('ISO2 country code'),
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+    ),
+  );
 }
 
 /**
