@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Mapper that handles importing Countries fields via Feeds module
+ * Feeds processor hooks for importing Countries fields using the Feeds module.
  */
 
 /**
