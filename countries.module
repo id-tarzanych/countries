@@ -427,10 +427,32 @@ function countries_get_continents() {
   $continents = &drupal_static(__FUNCTION__, array());
   if (empty($continents)) {
     $continents = variable_get('countries_continents', countries_get_default_continents());
-    // @todo I18n for user defined overrides.
+    $known = countries_known_continents();
+    $continents = array_intersect_key($known, $continents) + array_diff_key($continents, $known);
     uasort($continents, 'countries_sort');
   }
   return $continents;
+}
+
+/**
+ * Provides a bigger set of continents for i18n.
+ *
+ * If you enable a different set of continents from the default using the system
+ * variable 'countries_continents', following the codes below to allow the
+ * module to correctly set the continent names in multi-locale systems.
+ *
+ * Please submit an issue if you want other continents added to this list.
+ */
+function countries_known_continents() {
+  return countries_get_default_continents() + array(
+    'AE' => t('Afro-Eurasia'),
+    'AM' => t('Americas'),
+    'AU' => t('Australasia'),
+    'CA' => t('Caribbean'),
+    'CE' => t('Continental Europe'),
+    'ER' => t('Eurasia'),
+    'IC' => t('Indian subcontinent'),
+  );
 }
 
 /**
@@ -447,7 +469,7 @@ function countries_get_default_continents() {
     'SA' => t('South America'),
     'OC' => t('Oceania'),
     'AN' => t('Antarctica'),
-    'UN' => t('Unknown'),
+    'UN' => t('Unknown', array(), array('context' => 'countries')),
   );
 }
 
