@@ -255,11 +255,104 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
 }
 
 /**
+ * Implements hook_field_widget_info().
+ */
+function countries_field_widget_info() {
+  return array(
+    'countries_continent' => array(
+      'label' => t('Countries by continent'),
+      'field types' => array('country'),
+      'settings' => array(),
+    ),
+  );
+}
+
+/**
  * Implements hook_field_widget_info_alter().
  */
 function countries_field_widget_info_alter(&$info) {
   $info['options_buttons']['field types'][] = 'country';
   $info['options_select']['field types'][] = 'country';
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function countries_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  if ($instance['widget']['type'] == 'countries_continent') {
+    $field_name = $field['field_name'];
+    $settings = $field['settings'];
+    $continents = countries_get_continents();
+    
+    if (!empty($settings['continents'])) {
+      $continents = array_intersect_key($continents, $settings['continents']);
+    }
+
+    $parents = array($field_name, $langcode, $delta);
+    $iso2 = empty($items[$delta]['iso2']) ? NULL : $items[$delta]['iso2'];
+    $selected_continent = 'null';
+    if (isset($form_state['values'])) {
+      $selected_continent = drupal_array_get_nested_value($form_state['values'], array_merge($parents, array('continent')));
+      // This override the settings that are passed onto the options filter
+      // query. This is not usable without JScript enabled, so only update if
+      // we have a form submission.
+      $settings['continents'] = array($selected_continent);
+    }
+    elseif (!empty($iso2) && $country = country_load($iso2)) {
+      $selected_continent = $country->continent;
+    }
+
+    // Work out the best ID to exactly target the element.
+    $wrapper_parents = array_merge($form['#parents'], $parents, array('iso-wrapper'));
+    $wrapper_id = implode('-', $wrapper_parents);
+
+    // Assist themers with floating DIVs.
+    $element['#type'] = 'container';
+    $element['#attributes']['class'][] = 'clearfix countries-continent-wrapper';
+    $element['continent'] = array(
+      '#type' => 'select',
+      '#title' => t('Continent'),
+      '#options' => $continents,
+      '#empty_option' => t('-- None selected --'),
+      '#empty_value' => 'none',
+      '#default_value' => $selected_continent,
+      '#ajax' => array(
+        'callback' => '_ajax_countries_continent_widget_callback',
+        'wrapper' => $wrapper_id,
+      ),
+    );
+
+    $element['iso2'] = array(
+      '#type' => 'country',
+      '#title' => t('Country'),
+      '#default_value' => $iso2,
+      '#prefix' => '<div id="' . $wrapper_id . '" class="countries-ajax-wrapper">',
+      '#suffix' => '</div>',
+      '#empty_value' => 'none',
+      '#filters' => $settings,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="' . $field_name . '[' . $langcode . '][' . $delta . '][continent]"]' => array('!value' => 'none'),
+        ),
+      ),
+    );
+  }
+  return $element;
+}
+
+/**
+ * Returns the country element filtered by continent via AJAX.
+ */
+function _ajax_countries_continent_widget_callback($form, $form_state) {
+  $parents = $form_state['triggering_element']['#array_parents'];
+  array_pop($parents);
+  $parents[] = 'iso2';
+  $element = drupal_array_get_nested_value($form, $parents);
+  // Only return the element if it's not empty.
+  if (count($element['#options']) == 1 && isset($element['#options']['none'])) {
+    return;
+  }
+  return $element;
 }
 
 /**
