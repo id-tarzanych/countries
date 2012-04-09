@@ -90,11 +90,23 @@ function _countries_country_expand($element) {
   // Allow other modules to update this list.
   countries_invoke_additional_countries_alter($element['#options']);
 
-  // @todo This appears to be overridden via core now. Test and remove.
-  // If not required, add a none option. This can be overridden via setting
-  // the $element['#empty_value'] parameter to NULL.
+  // Ensure that this is set in case '#hide_empty' is used.
   if (empty($element['#required']) && !isset($element['#empty_value'])) {
     $element['#empty_value'] = '';
+  }
+
+  // Adds a hidden element style for support of the continent-country widget.
+  if (!empty($element['#hide_empty'])) {
+    // Only return the element if it's not empty.
+    $count = count($element['#options']);
+    if (!$count || ($count == 1 && isset($element['#options'][$element['#empty_value']]))) {
+      $element += array(
+        '#prefix' => '',
+        '#suffix' => '',
+      );
+      $element['#prefix'] .= '<div style="display: none;">';
+      $element['#suffix'] = '</div>' . $element['#suffix'];
+    }
   }
   return $element;
 }

@@ -289,8 +289,8 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
     }
 
     $parents = array($field_name, $langcode, $delta);
-    $iso2 = empty($items[$delta]['iso2']) ? NULL : $items[$delta]['iso2'];
-    $selected_continent = 'null';
+    $iso2 = empty($items[$delta]['iso2']) ? '' : $items[$delta]['iso2'];
+    $selected_continent = '';
     if (isset($form_state['values'])) {
       $selected_continent = drupal_array_get_nested_value($form_state['values'], array_merge($parents, array('continent')));
       // This override the settings that are passed onto the options filter
@@ -328,7 +328,8 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
       '#default_value' => $iso2,
       '#prefix' => '<div id="' . $wrapper_id . '" class="countries-ajax-wrapper">',
       '#suffix' => '</div>',
-      '#empty_value' => 'none',
+      '#empty_value' => '',
+      '#hide_empty' => TRUE,
       '#filters' => $settings,
       '#states' => array(
         'visible' => array(
@@ -348,10 +349,6 @@ function _ajax_countries_continent_widget_callback($form, $form_state) {
   array_pop($parents);
   $parents[] = 'iso2';
   $element = drupal_array_get_nested_value($form, $parents);
-  // Only return the element if it's not empty.
-  if (count($element['#options']) == 1 && isset($element['#options']['none'])) {
-    return;
-  }
   return $element;
 }
 
