@@ -22,6 +22,14 @@ Features include:
 
 Countries 7.x-2.x only
  * Entity API integration.
+ * A countries field with continent filter.
+ * New continent and continent code formatters
+ * Integration with CountryIcons v2 with more features for less loc.
+
+New hooks for listening to country changes.
+* hook_country_insert()
+* hook_country_update()
+* hook_country_delete()
 
 REQUIREMENTS
 ------------
@@ -38,7 +46,7 @@ INSTALLATION
     This is normally the "sites/all/modules" directory.
 
 2.  Go to admin/build/modules. Enable both modules.
-    It is found in the Others section.
+    The Countries modules is found in the Others section.
 
 Read more about installing modules at http://drupal.org/node/70151
 
@@ -134,6 +142,9 @@ based on status and continent.
 
 For Countries 7.x-2.x and latter, we recommend using a select element instead.
 
+However, there are no plans to drop this, especially now with the new continents
+country widget that uses it (it is easier and cleaner).
+
 --------------------------------------------------------------------------------
 <?php
   $element = array(
@@ -179,6 +190,8 @@ Official name
 ISO alpha-2 code
 ISO alpha-3 code
 ISO numeric-3 code
+Continent
+Continent code
 
 HOWTO / FAQ
 -----------
@@ -221,6 +234,31 @@ on your site that uses the theme, then delete the code.
 Any invalid continent keys that are found are converted to t('Unknown'), so
 update all respective countries before deleting any existing values.
 
+For I18n sites, to ensure that the new continents are translated correctly, use
+codes from the following list.
+
+* Default
+  'AF' => t('Africa'),
+  'AS' => t('Asia'),
+  'EU' => t('Europe'),
+  'NA' => t('North America'),
+  'SA' => t('South America'),
+  'OC' => t('Oceania'),
+  'AN' => t('Antarctica'),
+  'UN' => t('Unknown', array(), array('context' => 'countries')),
+
+* Additionally defined  
+  'AE' => t('Afro-Eurasia'),
+  'AM' => t('Americas'),
+  'AU' => t('Australasia'),
+  'CA' => t('Caribbean'),
+  'CE' => t('Continental Europe'),
+  'ER' => t('Eurasia'),
+  'IC' => t('Indian subcontinent'),
+
+If you need another continent listed, please lodge an issue and we will consider
+it for inclusion.
+
 3 - Hiding columns in the administrative country overview page.
 
 Like the continents, these are dynamically generated from the system variables.
@@ -244,8 +282,8 @@ The name, ISO alpha-2 and enabled columns can not be removed.
 
 This is in the early implemenation stages using the Entity API integration.
 
-5 - Why is the delete link hidden on some countries? Why is the edit ISO alpha-2
-code disabled on some countries?
+5 - Why is the delete link hidden on some countries?
+  - Why is the edit ISO alpha-2 code disabled on some countries?
 
 These are the countries that Drupal defines. To disable a country in the list of
 countries that Drupal generates, these must be present in the database. Also
@@ -343,7 +381,7 @@ foreach (countries_get_countries() as $country) {
   $list[$country->numcode] = $country->name;
 }
 
-$standard_list = array('' => t('Please Choose')) + countries_get_countries('name);
+$standard_list = array('' => t('Please Choose')) + countries_get_countries('name');
 
 # Please note that the following are equivalent.
 

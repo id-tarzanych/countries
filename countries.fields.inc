@@ -2,9 +2,7 @@
 
 /**
  * @file
- * Field related code.
- *
- * Note that we can not use hook_hook_info() to load this file.
+ * All field related code.
  */
 
 /**
@@ -283,7 +281,7 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
     $field_name = $field['field_name'];
     $settings = $field['settings'];
     $continents = countries_get_continents();
-    
+
     if (!empty($settings['continents'])) {
       $continents = array_intersect_key($continents, $settings['continents']);
     }

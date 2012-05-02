@@ -10,9 +10,11 @@
  */
 
 /**
- * Implements hook_element_info().
+ * Actual implementation hook_element_info().
+ *
+ * @see countries_element_info()
  */
-function countries_element_info() {
+function _countries_element_info() {
   $type['country'] = array(
     '#input' => TRUE,
     '#size' => 0,

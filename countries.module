@@ -30,17 +30,15 @@ define ('COUNTRIES_VIEWS_WIDGET_FIELD', 1);
  */
 define ('COUNTRIES_VIEWS_WIDGET_CUSTOM', 2);
 
-// Loads the field functions. These hooks are not supported by hook_hook_info().
+// Loads the field functions.
 include_once 'countries.fields.inc';
 
 /**
- * Implements hook_hook_info().
+ * Implements hook_element_info().
  */
-function countries_hook_info() {
-  $hooks['element_info'] = array(
-    'group' => 'elements',
-  );
-  return $hooks;
+function countries_element_info() {
+  module_load_include('elements.inc', 'countries');
+  return _countries_element_info();
 }
 
 /**
@@ -155,8 +153,8 @@ function countries_t($country, $property = 'name', $langcode = NULL, $type = 'co
 /**
  * Implements hook_countries_alter().
  *
- * Currently the only usage in core is in system module when
- * setting the sites default country.
+ * Currently the only usage in core is in system module when setting the sites
+ * default country.
  */
 function countries_countries_alter(&$countries) {
   $enabled_countries = &drupal_static(__FUNCTION__, array());
