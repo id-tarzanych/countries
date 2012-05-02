@@ -2,7 +2,7 @@
 
 /**
  * @file
- * countries_example.install
+ * Provides a variable clean up via hook_uninstall().
  */
 
 /**
@@ -17,4 +17,3 @@ function countries_example_uninstall() {
     variable_del('countries_example_default_country_' . $i);
   }
 }
-

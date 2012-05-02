@@ -139,13 +139,20 @@ function countries_import_csv() {
   $handle = fopen(dirname(__FILE__) . '/countries.csv', 'r');
   $headers = fgetcsv($handle, 1024, ",");
   while (($row = fgetcsv($handle, 1024, ",")) !== FALSE) {
-    $row[0] = trim($row[0]);  // iso2
-    $row[1] = empty($row[1]) || $row[1] == 'NULL' ? '' : trim($row[1]); // iso3
-    $row[2] = empty($row[2]) || $row[2] == 'NULL' ? '' : trim($row[2]); // name
-    $row[3] = empty($row[3]) || $row[3] == 'NULL' ? '' : trim($row[3]); // official name
-    $row[4] = empty($row[4]) || $row[4] == 'NULL' ? 0 : trim($row[4]); // number code
-    $row[5] = empty($row[5]) || $row[5] == 'NULL' ? 'UN' : trim($row[5]); // continent
-    $row[6] = empty($row[6]) || $row[6] == 'NULL' ? 0 : 1; // enabled
+    // The iso2 data.
+    $row[0] = trim($row[0]);
+    // The iso3 data.
+    $row[1] = empty($row[1]) || $row[1] == 'NULL' ? '' : trim($row[1]);
+    // The name data.
+    $row[2] = empty($row[2]) || $row[2] == 'NULL' ? '' : trim($row[2]);
+    // The official name data.
+    $row[3] = empty($row[3]) || $row[3] == 'NULL' ? '' : trim($row[3]);
+    // The number code data.
+    $row[4] = empty($row[4]) || $row[4] == 'NULL' ? 0 : trim($row[4]);
+    // The continent data.
+    $row[5] = empty($row[5]) || $row[5] == 'NULL' ? 'UN' : trim($row[5]);
+    // The enabled data.
+    $row[6] = empty($row[6]) || $row[6] == 'NULL' ? 0 : 1;
     if (!empty($row[0]) && $row[0] != 'NULL') {
       $countries[$row[0]] = array(
         'iso2' => $row[0],
@@ -178,7 +185,15 @@ function countries_import_csv() {
       );
     }
   }
-  $insert = db_insert('countries_country')->fields(array('iso2', 'iso3', 'name', 'official_name', 'continent', 'enabled', 'numcode'));
+  $insert = db_insert('countries_country')->fields(array(
+    'iso2',
+    'iso3',
+    'name',
+    'official_name',
+    'continent',
+    'enabled',
+    'numcode',
+  ));
   foreach ($countries as $country) {
     $insert->values($country);
   }
@@ -301,4 +316,3 @@ function countries_update_7204() {
   countries_install_available_update_message($link);
   cache_clear_all();
 }
-

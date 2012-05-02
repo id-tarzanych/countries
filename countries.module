@@ -8,27 +8,27 @@
 /**
  * Flag to return all countries.
  */
-define ('COUNTRIES_ALL', 0);
+define('COUNTRIES_ALL', 0);
 
 /**
  * Flag to return enabled countries only.
  */
-define ('COUNTRIES_ENABLED', 1);
+define('COUNTRIES_ENABLED', 1);
 
 /**
  * Flag to return disabled countries only.
  */
-define ('COUNTRIES_DISABLED', 2);
+define('COUNTRIES_DISABLED', 2);
 
 /**
  * Internal flag for views_handler_filter_countries_list class.
  */
-define ('COUNTRIES_VIEWS_WIDGET_FIELD', 1);
+define('COUNTRIES_VIEWS_WIDGET_FIELD', 1);
 
 /**
  * Internal flag for views_handler_filter_countries_list class.
  */
-define ('COUNTRIES_VIEWS_WIDGET_CUSTOM', 2);
+define('COUNTRIES_VIEWS_WIDGET_CUSTOM', 2);
 
 // Loads the field functions.
 include_once 'countries.fields.inc';
@@ -119,7 +119,7 @@ function countries_menu() {
 /**
  * Menu page title callback.
  *
- * @return $name
+ * @return string
  *   The santitised country name.
  */
 function countries_page_title($country) {
@@ -139,6 +139,7 @@ function countries_t($country, $property = 'name', $langcode = NULL, $type = 'co
     case 'name':
       $value = $country->name;
       break;
+
     case 'official_name':
       $value = empty($country->official_name) ? '' : $country->official_name;
       break;
@@ -209,7 +210,7 @@ function countries_field_extra_fields() {
   $extra = array();
   $extra['country']['country'] = array(
     'form' => array(),
-    'display' => array()
+    'display' => array(),
   );
   $weight = -20;
   foreach (countries_core_properties() as $key => $title) {
@@ -225,13 +226,13 @@ function countries_field_extra_fields() {
 /**
  * Load a country entity.
  *
- * @param $cid
+ * @param int $cid
  *   The country ID.
  *
- * @param $reset
+ * @param bool $reset
  *   Whether to reset the countries_load_multiple cache.
  *
- * @return $country
+ * @return object
  *   A country entity or FALSE on failure.
  */
 function countries_load($cid, $reset = FALSE) {
@@ -251,10 +252,10 @@ function countries_load_multiple($cids = array(), $conditions = array(), $reset 
 /**
  * Creates a default country object.
  *
- * @param $properties
+ * @param array $properties
  *   An array of additional properties to add to the new object.
  *
- * @return $country
+ * @return object
  *   A country strut by the additional properties and defaulted to the schema
  *   defined defaults.
  */
@@ -275,10 +276,10 @@ function country_create($properties = array()) {
  *
  * This is also a menu wildcard loader.
  *
- * @param $iso2
+ * @param string $iso2
  *   An ISO alpha-2 string. This is case-insensitive.
  *
- * @return $entity
+ * @return object
  *   A country object loaded by the entity controller.
  */
 function country_load($iso2) {
@@ -315,7 +316,7 @@ function countries_get_country($iso2) {
  *   }
  * @endcode
  *
- * @param $country
+ * @param object $country
  *   The country object that is about to be saved.
  *
  * @return bool
@@ -371,7 +372,7 @@ function country_validate(&$country) {
 /**
  * Saves a country.
  *
- * @param $country
+ * @param object $country
  *   The country object to save.
  *
  * @return int
@@ -384,7 +385,7 @@ function country_save(&$country) {
 /**
  * Delete a countries object from the database.
  *
- * @param $iso2
+ * @param string $iso2
  *   The countries ISO alpha-2 code.
  *
  * @return mixed
@@ -398,7 +399,7 @@ function country_delete($iso2) {
 /**
  * The module locks a country record if it is defined internally by Drupal.
  *
- * @param $country
+ * @param object $country
  *   The country object.
  *
  * @return bool
@@ -416,7 +417,7 @@ function country_is_locked($country) {
  * Note that it is possible to have continent codes that are not present in this
  * array if the user has overridden the variable setting "countries_continents".
  *
- * @return $continents
+ * @return array
  *   An array of continents indexed by their continent code.
  *
  * @see countries_get_default_continents()
@@ -526,13 +527,13 @@ function countries_filter($countries, $filters = array()) {
 /**
  * Updates a Query object by adding country filters.
  *
- * @param $query
+ * @param SelectQuery $query
  *   The SelectQuery object passed by reference.
  *
- * @param $filters
+ * @param array $filters
  *   An array of country filters as defined in countries_filters().
  *
- * @param $alias
+ * @param string $alias
  *   The {countries} table alias.
  */
 function countries_filter_query_alter(&$query, $filters = array(), $alias = 'c') {
@@ -604,11 +605,11 @@ function countries_invoke_additional_countries_alter(&$countries) {
  * This now accepts a list of filters to provide an easy method of returning
  * a filtered list of countries.
  *
- * @param $property
+ * @param string $property
  *   A property of the country to return rather than the  entire country object.
  *   Leave unset or pass in 'all' to have the country objects returned.
  *
- * @param $filters
+ * @param array $filters
  *   An array of filters. See countries_filter() for details.
  *
  * @return array
@@ -647,7 +648,7 @@ function countries_get_countries($property = 'all', $filters = array()) {
 /**
  * Helper function to list the core properties of a country entity.
  *
- * @return
+ * @return array
  *   An array of strings indexed by the country schema keys.
  */
 function countries_core_properties() {
@@ -660,7 +661,7 @@ function countries_core_properties() {
       'iso2' => t('ISO alpha-2 code'),
       'iso3' => t('ISO alpha-3 code'),
       'numcode' => t('ISO numeric-3 code'),
-  		'continent' => t('Continent'),
+      'continent' => t('Continent'),
     );
   }
   return $core_properties;
@@ -669,20 +670,20 @@ function countries_core_properties() {
 /**
  * Helper function to help standardise the display of the core properties.
  *
- * @param $country
+ * @param object $country
  *   A country object.
- * @param $property
+ * @param string $property
  *   The requested property.
- * @param $default
+ * @param string $default
  *   The default value to use if the property is not set or it is empty.
  *
  *   The cid and enabled flags ignore defaults. The cid value is always returned
  *   raw and enabled is either Enabled or Disabled strings.
  *
- * @param $sanitize
+ * @param bool $sanitize
  *   Boolean to indicate whether an HTML safe version is required.
  *
- * @return $property
+ * @return string|int
  *   Integer cid or string representation of other properties.
  */
 function country_property($country, $property, $default = NULL, $sanitize = TRUE) {
@@ -741,14 +742,14 @@ function country_property($country, $property, $default = NULL, $sanitize = TRUE
 /**
  * A helper function to find a country based on any country property.
  *
- * @param $value
+ * @param string $value
  *   Search keyword to find a country for.
  *
- * @param $property
+ * @param string $property
  *   The country property to search with. If empty, the code will attempt to
  *   guess what property the user is looking for. This is not recommended!
  *
- * @return $country
+ * @return object
  *   The loaded country or FALSE if no match was found.
  */
 function countries_country_lookup($value, $property = NULL) {
@@ -801,7 +802,7 @@ function countries_country_lookup($value, $property = NULL) {
 /**
  * Private internal helper function to estimate the property type.
  */
-function  _countries_estimate_property_type($value) {
+function _countries_estimate_property_type($value) {
   if (is_numeric($value)) {
     return 'numcode';
   }
@@ -916,8 +917,8 @@ function countries_apachesolr_field_mappings() {
       'indexing_callback' => 'countries_apachesolr_indexing_callback',
       'map callback' => 'countries_apachesolr_map_callback',
       'index_type' => 'string',
-      'facets' => TRUE
-    )
+      'facets' => TRUE,
+    ),
   );
   return $mappings;
 }
@@ -958,10 +959,10 @@ function countries_apachesolr_map_callback(array $values) {
 /**
  * Returns the country name to be used in the facet.
  *
- *  @param $facet string
- *    The indexed value
- *  @param $options
- *    An array of options including the hook_block $delta.
+ * @param string $facet
+ *   The indexed value.
+ * @param array $options
+ *   An array of options including the hook_block $delta.
  */
 function countries_apachesolr_display_callback($facet, $options) {
   $fields = field_info_fields();

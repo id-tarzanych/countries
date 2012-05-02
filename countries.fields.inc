@@ -13,7 +13,12 @@ function countries_field_info() {
     'country' => array(
       'label' => t('Country'),
       'description' => t('This field stores a country reference in the database.'),
-      'settings' => array('countries' => array(), 'continents' => array(), 'enabled' => COUNTRIES_ENABLED, 'size' => 5),
+      'settings' => array(
+        'countries' => array(),
+        'continents' => array(),
+        'enabled' => COUNTRIES_ENABLED,
+        'size' => 5,
+      ),
       'default_widget' => 'options_select',
       'default_formatter' => 'country_default',
       // Support hook_entity_property_info() from contrib "Entity API".
@@ -139,7 +144,7 @@ function countries_field_formatter_info() {
  */
 function countries_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
-  $settings = (array)$display['settings'];
+  $settings = (array) $display['settings'];
   $settings += array(
     'countryiconset' => '',
     'property' => '',
@@ -153,11 +158,15 @@ function countries_field_formatter_settings_summary($field, $instance, $view_mod
       $key = version_compare("$version", '2.0') >= 0 ? $iconset['key'] : $iconset['name'];
       $name = version_compare("$version", '2.0') >= 0 ? $iconset['name'] : $iconset['description'];
       if ('icon_' . $key == $settings['countryiconset']) {
-        $summary = t('<strong>Icon:</strong> @country_icon_set', array('@country_icon_set' => empty($name) ? $key : $name));
+        $summary = t('<strong>Icon:</strong> @country_icon_set', array(
+          '@country_icon_set' => empty($name) ? $key : $name,
+        ));
         break;
       }
       elseif ('sprite_' . $key == $settings['countryiconset']) {
-        $summary = t('<strong>Icon sprite:</strong> @country_icon_set', array('@country_icon_set' =>  empty($name) ? $key : $name));
+        $summary = t('<strong>Icon sprite:</strong> @country_icon_set', array(
+          '@country_icon_set' => empty($name) ? $key : $name,
+        ));
         break;
       }
     }

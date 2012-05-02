@@ -46,7 +46,7 @@ INSTALLATION
     This is normally the "sites/all/modules" directory.
 
 2.  Go to admin/build/modules. Enable both modules.
-    The Countries modules is found in the Others section.
+    The Countries modules is found in the Fields section.
 
 Read more about installing modules at http://drupal.org/node/70151
 

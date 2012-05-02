@@ -69,7 +69,11 @@ function countries_configuration($country, $name, $load_defaults = 1) {
       $config += $config_options[$name]['default values'];
     }
   }
-  $info = array('country' => $country, 'is_new' => $is_new, 'load_defaults' => $load_defaults);
+  $info = array(
+    'country' => $country,
+    'is_new' => $is_new,
+    'load_defaults' => $load_defaults,
+  );
   drupal_alter('countries_configuration_options', $config, $name, $info);
 
   return $config;

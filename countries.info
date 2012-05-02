@@ -1,7 +1,6 @@
 name = Countries
 description = A module that provides a FAPI / Field country element and a simple wrapper module to store / update country data.
 package = Fields
-version = VERSION
 core = 7.x
 files[] = views/views_handler_field_countries_continent.inc
 files[] = views/views_handler_filter_countries_continents_list.inc
@@ -12,4 +11,3 @@ files[] = tests/countries.test
 configure = admin/config/regional/countries
 dependencies[] = entity
 recommends[] = countryicons
-

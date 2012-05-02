@@ -1,11 +1,12 @@
 <?php
+
 /**
  * @file
  * Provides translation for countries module.
  */
 
 /**
- * Implements hook_i18n_string_info()
+ * Implements hook_i18n_string_info().
  */
 function countries_i18n_i18n_string_info() {
   $groups['countries'] = array(
@@ -19,7 +20,7 @@ function countries_i18n_i18n_string_info() {
 }
 
 /**
- * Implements hook_i18n_object_info()
+ * Implements hook_i18n_object_info().
  */
 function countries_i18n_i18n_object_info() {
   $info['country'] = array(
@@ -32,7 +33,7 @@ function countries_i18n_i18n_object_info() {
     'edit path' => 'admin/config/regional/countries/%country',
     'translate tab' => 'admin/config/regional/countries/%country/translate',
     'list callback' => 'countries_get_countries',
-    // Metadata for string translation
+    // Metadata for string translation.
     'string translation' => array(
       'textgroup' => 'countries',
       'type' => 'country',
@@ -40,7 +41,7 @@ function countries_i18n_i18n_object_info() {
         'name' => t('Name'),
         'official_name' => t('Official name'),
       ),
-    )
+    ),
   );
   return $info;
 }
@@ -67,7 +68,7 @@ function countries_i18n_country_insert($country) {
 }
 
 /**
- * Implements hook_country_delete()
+ * Implements hook_country_delete().
  */
 function countries_i18n_country_delete($info) {
   i18n_string_object_remove('country', $info);
@@ -88,15 +89,15 @@ function countries_i18n_string_refresh() {
 /**
  * Helper function to help integrate with the i18n_strings module.
  *
- * @param $iso2
+ * @param string $iso2
  *   The country iso2 code
- * @param $property
+ * @param string $property
  *   The property to be translated
- * @param $string
+ * @param string $string
  *   The raw db value for the given property
- * @param $langcode
+ * @param string $langcode
  *   Optional language code to override the page requested one.
- * @param $textgroup
+ * @param string $type
  *   Base group, defaults to 'countries'.
  */
 function countries_i18n_translate($iso2, $property, $string, $langcode = NULL, $type = 'country') {
@@ -131,15 +132,16 @@ function countries_i18n_field_formatter_view($entity_type, $entity, $field, $ins
     case 'country_default_i18n':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
-         '#markup' => check_plain(countries_i18n_translate($item['iso2'], 'name', $item['safe_value'])),
+          '#markup' => check_plain(countries_i18n_translate($item['iso2'], 'name', $item['safe_value'])),
         );
       }
       break;
+
     case 'country_official_i18n':
       foreach ($items as $delta => $item) {
         $official_name = isset($item['country']->official_name) ? $item['country']->official_name : $item['safe_value'];
         $element[$delta] = array(
-         '#markup' => check_plain(countries_i18n_translate($item['iso2'], 'official_name', $official_name)),
+          '#markup' => check_plain(countries_i18n_translate($item['iso2'], 'official_name', $official_name)),
         );
       }
       break;

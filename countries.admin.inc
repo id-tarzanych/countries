@@ -54,7 +54,7 @@ function countries_admin_overview() {
       'data' => country_property($country, 'enabled'),
       'id' => $country->iso2 . '-enabled',
     );
-    $operations = l(t('edit'), 'admin/config/regional/countries/' . $country->iso2 , array('query' => $destination));
+    $operations = l(t('edit'), 'admin/config/regional/countries/' . $country->iso2, array('query' => $destination));
     if (module_exists('countries_regions')) {
       $count = countries_regions_count($country);
       $operations .= '&nbsp;&nbsp;&nbsp;' . l(t('!count regions', array('!count' => $count)), 'admin/config/regional/countries/' . $country->iso2 . '/regions', array('query' => $destination));
@@ -104,21 +104,21 @@ function countries_admin_page($country = NULL) {
  * @see countries_admin_form_submit()
  */
 function countries_admin_form($form, &$form_state, $country) {
-
-  $form['cid'] = array('#type' => 'value',
+  $form['cid'] = array(
+    '#type' => 'value',
     '#value' => $country->cid,
   );
-
-  $form['name'] = array('#type' => 'textfield',
+  $form['name'] = array(
+    '#type' => 'textfield',
     '#title' => t('Name'),
     '#default_value' => $country->name,
     '#description' => t('Specify an unique name for this country.'),
     '#required' => TRUE,
     '#maxlength' => 95,
   );
-
   $locked = country_is_locked($country);
-  $form['iso2'] = array('#type' => 'textfield',
+  $form['iso2'] = array('
+    #type' => 'textfield',
     '#title' => t('ISO alpha-2 code'),
     '#default_value' => $country->iso2,
     '#required' => TRUE,
@@ -131,35 +131,39 @@ function countries_admin_form($form, &$form_state, $country) {
   else {
     $form['iso2']['#description'] = t('Specify an unique alpha-2 code for this country. This is used as the key to this country, changing it may result in data loss.');
   }
-
-  $form['iso3'] = array('#type' => 'textfield',
+  $form['iso3'] = array(
+    '#type' => 'textfield',
     '#title' => t('ISO alpha-3 code'),
     '#default_value' => $country->iso3,
     '#description' => t('Specify an unique ISO alpha-3 code for this country.'),
     '#required' => FALSE,
     '#maxlength' => 3,
   );
-  $form['official_name'] = array('#type' => 'textfield',
+  $form['official_name'] = array(
+    '#type' => 'textfield',
     '#title' => t('Official name'),
     '#default_value' => $country->official_name,
     '#description' => t('Specify an unique official name for this country.'),
     '#required' => FALSE,
     '#maxlength' => 127,
   );
-  $form['numcode'] = array('#type' => 'textfield',
+  $form['numcode'] = array(
+    '#type' => 'textfield',
     '#title' => t('ISO numeric-3 code'),
     '#default_value' => empty($country->numcode) ? '' : $country->numcode,
     '#description' => t('Specify an unique ISO numeric-3 code for this country.'),
     '#required' => FALSE,
     '#maxlength' => 5,
   );
-  $form['continent'] = array('#type' => 'select',
+  $form['continent'] = array(
+    '#type' => 'select',
     '#title' => t('Continent'),
     '#options' => countries_get_continents(),
     '#default_value' => $country->continent,
     '#required' => TRUE,
   );
-  $form['enabled'] = array('#type' => 'checkbox',
+  $form['enabled'] = array(
+    '#type' => 'checkbox',
     '#title' => t('Status'),
     '#default_value' => $country->enabled,
     '#description' => t('Disabling a country should removing it from all country listings, with the exclusion of views and fields define by the Countries module. These will allow you to choose the status per field.'),
@@ -168,8 +172,13 @@ function countries_admin_form($form, &$form_state, $country) {
   if (!empty($country->iso2)) {
     $form['#country'] = $country;
   }
+
   field_attach_form('country', $country, $form, $form_state);
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Save'), '#weight' => 100);
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 100,
+  );
   return $form;
 }
 
@@ -185,8 +194,10 @@ function countries_admin_form_validate($form, &$form_state) {
     if (empty($form['#country'])) {
       form_set_error('iso2',
         t('Another country was found with this ISO alpha-2 code; !link',
-        array('!link' => l(countries_t($existing),
-        'admin/config/regional/countries/' . $existing->iso2))));
+        array(
+          '!link' => l(countries_t($existing),
+          'admin/config/regional/countries/' . $existing->iso2),
+        )));
       return;
     }
     elseif ($existing->iso2 != $form['#country']->iso2) {
@@ -355,6 +366,9 @@ function countries_admin_import_form($form, &$form_state) {
   return $form;
 }
 
+/**
+ * Submit handler.
+ */
 function countries_admin_import_form_submit($form, &$form_state) {
   $inserted = array();
   $updated = array();
@@ -382,7 +396,7 @@ function countries_admin_import_form_submit($form, &$form_state) {
   if (!empty($form_state['updates'])) {
     $changes = array();
     foreach (array_filter($form_state['values']['updates']) as $change) {
-      list ($iso2, $key) = explode ('-', $change);
+      list ($iso2, $key) = explode('-', $change);
       $changes[$iso2][$key] = $form_state['updates'][$iso2][$key]['new'];
     }
     foreach ($changes as $iso2 => $values) {
@@ -417,6 +431,9 @@ function countries_admin_import_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/config/regional/countries';
 }
 
+/**
+ * Parses the given CSV file.
+ */
 function countries_csv_updates($file = NULL) {
   if (!$file) {
     $file = variable_get('countries_csv_datasource',
@@ -441,7 +458,7 @@ function countries_csv_updates($file = NULL) {
   if ($handle = @fopen($file, "r")) {
     $headers = fgetcsv($handle, 1024, ",");
     while (($row = fgetcsv($handle, 1024, ",")) !== FALSE) {
-      $country = new StdClass;
+      $country = new StdClass();
       $errors = array();
       foreach ($row as $index => $value) {
         if (!isset($defaults[$headers[$index]])) {
@@ -478,7 +495,7 @@ function countries_csv_updates($file = NULL) {
         if (empty($country->{$key}) && $key != 'enabled') {
           continue;
         }
-        if ((string)$existing->{$key} !== (string)$country->{$key}) {
+        if ((string) $existing->{$key} !== (string) $country->{$key}) {
           $updates[$country->iso2][$key] = array('new' => $country->{$key}, 'old' => $existing->{$key});
         }
       }
@@ -571,8 +588,10 @@ function country_duplicate_field_check($country) {
       if (!empty($value)) {
         $conflict = country_load($value);
         $duplicates[$property] = t('The %value is already used by !country',
-            array('%value' => $country->$property,
-            '!country' => country_property($conflict, 'name')));
+            array(
+              '%value' => $country->$property,
+              '!country' => country_property($conflict, 'name'),
+            ));
       }
     }
   }

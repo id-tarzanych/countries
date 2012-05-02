@@ -7,11 +7,11 @@
 /**
  * Implements hook_feeds_processor_targets_alter().
  *
- * @param $targets
+ * @param array $targets
  *   Array containing the targets to be offered to the user.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type of the target, for instance a 'node' entity.
- * @param $bundle_name
+ * @param string $bundle_name
  *   The bundle name for which to alter targets.
  */
 function countries_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
@@ -49,14 +49,14 @@ function _countries_feeds_set_target($source, $entity, $target, $values) {
   list($entity_type, $bundle_name, $field_name, $property) = explode(':', $target, 4);
   $field = field_read_field($field_name);
   $settings = $field['settings'];
-  $continents = array_filter((array)$settings['continents']);
+  $continents = array_filter((array) $settings['continents']);
 
   // Iterate over all values.
   $i = 0;
   $entity->{$field_name} = isset($entity->$field_name) ? $entity->{$field_name} : array();
   foreach ($values as $value) {
     if ($country = countries_country_lookup($value, $property)) {
-      // Check instance settings
+      // Check instance settings.
       if ($settings['enabled'] == COUNTRIES_ENABLED && !$country->enabled) {
         continue;
       }

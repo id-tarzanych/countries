@@ -4,13 +4,17 @@
  * @file
  * Base integration with the Migrate API class.
  */
+
+/**
+ * Custom extended MigrateFieldHandler class.
+ */
 class MigrateCountryFieldHandler extends MigrateFieldHandler {
   public function __construct() {
     $this->registerTypes(array('country'));
   }
 
   public function prepare(stdClass $entity, array $field_info, array $instance, array $values) {
-    $arguments = (isset($values['arguments']))? $values['arguments']: array();
+    $arguments = (isset($values['arguments'])) ? $values['arguments'] : array();
     $language = $this->getFieldLanguage($entity, $field_info, $arguments);
     $delta = 0;
 

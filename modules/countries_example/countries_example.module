@@ -24,6 +24,9 @@ function countries_example_menu() {
   return $items;
 }
 
+/**
+ * Menu callback; example countries form.
+ */
 function countries_example($form, &$form_state) {
   $form['countries_example_default_core'] = array(
     '#markup' => t('<h3>Core Drupal Examples</h3><p>These examples use Drupals internal api with no external dependencies. They all use a FAPI <em>select</em> element</p>'),
@@ -131,7 +134,7 @@ function countries_example($form, &$form_state) {
     '#type' => 'country',
     '#title' => t('Select a disabled country'),
     '#default_value' => variable_get('countries_example_default_country_8', ''),
-    // This is core Drupal 7 functionality
+    // This is core Drupal 7 functionality.
     '#empty_option' => t('-- None selected --'),
     '#filters' => array(
       'enabled' => COUNTRIES_DISABLED,

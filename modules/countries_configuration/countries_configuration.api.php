@@ -27,7 +27,7 @@ function hook_countries_configuration_options() {
       ),
       // Optional: Includes this title before any callbacks are executed.
       'file' => 'address.admin.inc',
-      // Optional: The path to the included file if not in the base module directory.
+      // Optional: included file path if not in the base module directory.
       'file path' => drupal_get_path('module', 'address') . '/includes',
       // Optional: Provides a help section to forms.
       'help' => t('This form allows you to set country specific configuration options for all address fields. Leave these blank to use the field defaults. Available address components are determined by the field settings.'),
@@ -45,11 +45,11 @@ function hook_countries_configuration_options() {
  * Provides a hook into dynamically changing the settings provided by
  * hook_countries_configuration_options() in relation to a country.
  *
- * @param $values
+ * @param array $values
  *   The values with the default values loaded.
- * @param $name
+ * @param string $name
  *   The machine name given to this country configuration set.
- * @param $info
+ * @param array $info
  *   Additional info. Keyed elements are:
  *     country       - the country object or iso2 code.
  *     is_new        - flag to check if any data is stored for this country.
@@ -58,7 +58,7 @@ function hook_countries_configuration_options() {
  *                     defaults are loaded into the Field UI area.
  */
 function hook_countries_configuration_options_alter(&$values, $name, $info) {
-  if ($name == 'address' && ! $info['is_new']) {
+  if ($name == 'address' && !$info['is_new']) {
     if ($overrides = address_country_details($info['country'])) {
       $values['labels'] = $overrides['labels'] + $values['labels'];
     }
@@ -110,7 +110,7 @@ function example_address_country_admin_form_title($country) {
 /**
  * An example implementing how you would use the data saved.
  *
- * @param $country
+ * @param object $country
  *   The country object to configure.
  */
 function example_address_country_configuration_usage($country) {

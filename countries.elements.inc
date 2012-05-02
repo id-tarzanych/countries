@@ -19,7 +19,11 @@ function _countries_element_info() {
     '#input' => TRUE,
     '#size' => 0,
     '#multiple' => FALSE,
-    '#process' => array('countries_country_expand', 'form_process_select', 'ajax_process_form'),
+    '#process' => array(
+      'countries_country_expand',
+      'form_process_select',
+      'ajax_process_form',
+    ),
     '#element_validate' => array('countries_country_element_validate'),
     '#theme' => 'select',
     '#theme_wrappers' => array('form_element'),
@@ -37,12 +41,13 @@ function _countries_element_info() {
 /**
  * Helper function to determine the value for a country form element.
  *
- * @param $element
+ * @param array $element
  *   The form element whose value is being populated.
- * @param $input
+ * @param bool|string|array $input
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
- * @return
+ *
+ * @return array|string
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */

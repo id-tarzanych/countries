@@ -16,7 +16,7 @@ function countries_views_data() {
   $data['countries_country']['table']['base'] = array(
     'field' => 'cid',
     'title' => t('Countries'),
-    'help' => ''
+    'help' => '',
   );
 
   $data['countries_country']['cid'] = array(
@@ -186,7 +186,7 @@ function countries_views_data() {
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Enabled'),
       'type' => 'yes-no',
-      // use boolean_field = 1 instead of boolean_field <> 0 in WHERE statement
+      // Use boolean_field = 1 instead of boolean_field <> 0 in WHERE statement.
       'use equal' => TRUE,
     ),
     'sort' => array(
