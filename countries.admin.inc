@@ -117,8 +117,8 @@ function countries_admin_form($form, &$form_state, $country) {
     '#maxlength' => 95,
   );
   $locked = country_is_locked($country);
-  $form['iso2'] = array('
-    #type' => 'textfield',
+  $form['iso2'] = array(
+    '#type' => 'textfield',
     '#title' => t('ISO alpha-2 code'),
     '#default_value' => $country->iso2,
     '#required' => TRUE,
