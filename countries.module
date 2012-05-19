@@ -448,12 +448,38 @@ function countries_get_continents() {
 function countries_known_continents() {
   return countries_get_default_continents() + array(
     'AE' => t('Afro-Eurasia'),
-    'AM' => t('Americas'),
-    'AU' => t('Australasia'),
-    'CA' => t('Caribbean'),
+
+    '1S' => t('Southern Africa'),
+    '1W' => t('Western Africa'),
+    '1N' => t('Northern Africa'),
+    '1M' => t('Middle Africa'),
+    '1E' => t('Eastern Africa'),
+
+    '2S' => t('Southern Asia'),
+    '2W' => t('Western Asia'),
+    '2Z' => t('South-Eastern Asia'),
+    '2E' => t('Eastern Asia'),
+    '2C' => t('Central Asia'),
+    'IC' => t('Indian subcontinent'),
+    '2M' => t('Middle East'),
+    '2G' => t('Greater Middle East'),
+
+    '3S' => t('Southern Europe'),
+    '3W' => t('Western Europe'),
+    '3E' => t('Eastern Europe'),
+    '3N' => t('Northern Europe'),
     'CE' => t('Continental Europe'),
     'ER' => t('Eurasia'),
-    'IC' => t('Indian subcontinent'),
+
+    'AM' => t('Americas'),
+    'CA' => t('Caribbean'),
+    'AC' => t('Central America'),
+
+    'AU' => t('Australasia'),
+    'AZ' => t('Australia and New Zealand'),
+    'PO' => t('Polynesia'),
+    'ME' => t('Melanesia'),
+    'MI' => t('Micronesia'),
   );
 }
 
