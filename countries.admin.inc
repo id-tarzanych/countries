@@ -295,7 +295,7 @@ function countries_admin_import_form($form, &$form_state) {
         '%enabled' => $country->enabled ? t('Enabled') : t('Disabled'),
       );
       $form['inserts']['#options'][$iso2] = t('New country %name, %continent (%official_name): %iso2, %iso3, %numcode, %enabled', $t_options);
-      $form['inserts']['#default_options'][$iso2] = $iso2;
+      $form['inserts']['#default_value'][$iso2] = $iso2;
     }
   }
   else {
@@ -333,7 +333,7 @@ function countries_admin_import_form($form, &$form_state) {
         else {
           $form['updates']['#options'][$iso2 . '-' . $key] = t('%name (%iso2): Change %code from "%old" to "%new"', $t_options);
         }
-        $form['updates']['#default_options'][$iso2 . '-' . $key] = $iso2 . '-' . $key;
+        $form['updates']['#default_value'][$iso2 . '-' . $key] = $iso2 . '-' . $key;
       }
     }
   }
@@ -373,7 +373,6 @@ function countries_admin_import_form_submit($form, &$form_state) {
   $inserted = array();
   $updated = array();
   $skipped = array();
-  $core_properties = countries_core_properties();
   if (!empty($form_state['inserts'])) {
     foreach (array_filter($form_state['values']['inserts']) as $iso2) {
       $country = $form_state['inserts'][$iso2];
@@ -434,13 +433,13 @@ function countries_admin_import_form_submit($form, &$form_state) {
 /**
  * Parses the given CSV file.
  */
-function countries_csv_updates($file = NULL) {
+function countries_csv_updates($file = NULL, $defaults = array()) {
   if (!$file) {
     $file = variable_get('countries_csv_datasource',
         drupal_get_path('module', 'countries') . '/countries.csv');
   }
 
-  $defaults = array(
+  $defaults += array(
     'name' => '',
     'official_name' => '',
     'enabled' => 0,
@@ -467,12 +466,14 @@ function countries_csv_updates($file = NULL) {
         $key = $headers[$index];
         $value = trim($value);
         if (empty($value) || $value == 'NULL') {
-          $value = $defaults[$key];
+          // Skip setting defaults until we check existing countries latter.
         }
         elseif ($error = countries_property_invalid($key, $value)) {
           $errors[] = $error;
         }
-        $country->$key = $value;
+        else {
+          $country->$key = $value;
+        }
       }
 
       if (!empty($country->iso2)) {
@@ -490,10 +491,16 @@ function countries_csv_updates($file = NULL) {
 
   foreach ($countries as $country) {
     if ($existing = country_load($country->iso2)) {
-      foreach (array_keys($defaults) as $key) {
+      foreach ($defaults as $key => $default_value) {
         // The only empty value we update is enabled.
         if (empty($country->{$key}) && $key != 'enabled') {
           continue;
+        }
+        if (!isset($existing->{$key})) {
+          continue;
+        }
+        if (!isset($country->{$key})) {
+          $country->{$key} = $existing ? $existing->{$key} : $default_value;
         }
         if ((string) $existing->{$key} !== (string) $country->{$key}) {
           $updates[$country->iso2][$key] = array('new' => $country->{$key}, 'old' => $existing->{$key});
@@ -501,6 +508,7 @@ function countries_csv_updates($file = NULL) {
       }
     }
     else {
+      $country = (object) (((array) $country) + $defaults);
       $inserts[$country->iso2] = $country;
     }
   }

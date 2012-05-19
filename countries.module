@@ -440,6 +440,9 @@ function countries_get_continents() {
  * variable 'countries_continents', following the codes below to allow the
  * module to correctly set the continent names in multi-locale systems.
  *
+ * As per the default continent fields, these codes do not correlate to any
+ * known existing continental code standard.
+ *
  * Please submit an issue if you want other continents added to this list.
  */
 function countries_known_continents() {
@@ -702,6 +705,7 @@ function country_property($country, $property, $default = NULL, $sanitize = TRUE
       break;
 
     case 'continent':
+    case 'continent_name':
       $continents = countries_get_continents();
       if (!empty($country->continent) && !empty($continents[$country->continent])) {
         $output = $continents[$country->continent];
