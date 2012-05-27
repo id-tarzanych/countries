@@ -646,9 +646,6 @@ function countries_invoke_additional_countries_alter(&$countries) {
  */
 function countries_get_countries($property = 'all', $filters = array()) {
   $countries = entity_load_multiple_by_name('country');
-  if ($property == 'all') {
-    return $countries;
-  }
 
   $filtered_countries = countries_filter($countries, $filters);
 
