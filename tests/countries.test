@@ -139,6 +139,7 @@ class CountriesBaseSetupTest extends DrupalWebTestCase {
       'CI' => t("Côte d'Ivoire"),
       'FK' => t('Falkland Islands (Malvinas)'),
       'FM' => t('Micronesia, Federated States of'),
+      'HK' => t('Hong Kong'),
       'IR' => t('Iran, Islamic Republic of'),
       'KP' => t("Korea, Democratic People's Republic of"),
       'KR' => t('Korea, Republic of'),
@@ -150,6 +151,8 @@ class CountriesBaseSetupTest extends DrupalWebTestCase {
       'RE' => t('Réunion'),
       'RU' => t('Russian Federation'),
       'SH' => t('Saint Helena, Ascension and Tristan da Cunha'),
+      'ST' => t('São Tomé and Príncipe'),
+      'SY' => t('Syrian Arab Republic'),
       'TW' => t('Taiwan, Province of China'),
       'TZ' => t('Tanzania, United Republic of'),
       'VA' => t('Holy See (Vatican City State)'),
@@ -362,7 +365,14 @@ class CountriesBaseImportUnitTest extends CountriesBaseSetupTest {
     // TODO: Remove - Debugging
     $this->drupalGet('admin/config/regional/countries/import');
 
-    $edit = array("updates[AX-name]" => TRUE);
+    $updated_countries = array('AX');
+    $edit = array("updates[AX-name]" => TRUE, 'updates[AN-enabled]' => FALSE);
+    foreach ($changed_countries as $iso2 => $name) {
+      if (in_array($iso2, $updated_countries)) {
+        continue;
+      }
+      $edit["updates[{$iso2}-name]"] = FALSE;
+    }
     $this->drupalPost('admin/config/regional/countries/import', $edit, t('Import'));
     $this->assertText(t('The updated countries were: ' . $changed_countries['AX']), 'Successful save message displayed.');
 
@@ -383,6 +393,14 @@ class CountriesBaseImportUnitTest extends CountriesBaseSetupTest {
     $this->assertNotNull($countries['AN'], 'Testing soon to be disabled Netherlands Antilles is in the country_get_list()');
 
     $edit = array("updates[AN-enabled]" => TRUE);
+    $updated_countries[] = 'AN';
+    foreach ($changed_countries as $iso2 => $name) {
+      if (in_array($iso2, $updated_countries)) {
+        continue;
+      }
+      $edit["updates[{$iso2}-name]"] = FALSE;
+    }
+
     $this->drupalPost('admin/config/regional/countries/import', $edit, t('Import'));
     $this->assertText(t('The updated countries were: Netherlands Antilles'), 'Successful save message displayed.');
 
@@ -403,6 +421,9 @@ class CountriesBaseImportUnitTest extends CountriesBaseSetupTest {
 
     $edit = array();
     foreach ($changed_countries as $iso => $name) {
+      if (in_array($iso, $updated_countries)) {
+        continue;
+      }
       $edit["updates[{$iso}-name]"] = TRUE;
     }
     $this->drupalPost('admin/config/regional/countries/import', $edit, t('Import'));

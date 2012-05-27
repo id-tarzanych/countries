@@ -465,7 +465,13 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
         }
         $key = $headers[$index];
         $value = trim($value);
-        if (empty($value) || $value == 'NULL') {
+        // We need special processing for the enabled key.
+        if ($key == 'enabled') {
+          if (strlen($value) && $value != 'NULL') {
+            $country->$key = empty($value) ? 0 : 1;
+          }
+        }
+        elseif (empty($value) || $value == 'NULL') {
           // Skip setting defaults until we check existing countries latter.
         }
         elseif ($error = countries_property_invalid($key, $value)) {
