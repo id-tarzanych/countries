@@ -182,6 +182,7 @@ function countries_entity_info() {
       'entity keys' => array(
         'id' => 'cid',
         'name' => 'iso2',
+        'label' => 'name',
       ),
       'bundles' => array(
         'country' => array(
