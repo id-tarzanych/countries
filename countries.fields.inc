@@ -306,22 +306,35 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
       $continents = array_intersect_key($continents, $settings['continents']);
     }
 
-    $parents = array($field_name, $langcode, $delta);
+    // Widget may be rendered individually, in a group or even a sub-form.
+    $field_parents = empty($form['#parents']) ? array() : $form['#parents'];
+    $parents = array_merge($field_parents, array($field_name, $langcode, $delta));
+    $continent_parents = array_merge($parents, array('continent'));
+
     $iso2 = empty($items[$delta]['iso2']) ? '' : $items[$delta]['iso2'];
     $selected_continent = '';
     if (isset($form_state['values'])) {
-      $selected_continent = drupal_array_get_nested_value($form_state['values'], array_merge($parents, array('continent')));
       // This override the settings that are passed onto the options filter
-      // query. This is not usable without JScript enabled, so only update if
-      // we have a form submission.
-      $settings['continents'] = array($selected_continent);
+      // query. This is not called when JScript is disabled.
+      $selected_continent = drupal_array_get_nested_value($form_state['values'], $continent_parents);
+      if (!$selected_continent) {
+        // Fallback to the raw user post. A workaround for AJAX submissions.
+        $user_data = drupal_array_get_nested_value($form_state['input'], $continent_parents);
+        if (array_key_exists($user_data, $continents)) {
+          $selected_continent = $user_data;
+        }
+      }
+      // Do not override the continent settings when empty.
+      if ($selected_continent) {
+        $settings['continents'] = array($selected_continent);
+      }
     }
     elseif (!empty($iso2) && $country = country_load($iso2)) {
       $selected_continent = $country->continent;
     }
 
     // Work out the best ID to exactly target the element.
-    $wrapper_parents = array_merge($form['#parents'], $parents, array('iso-wrapper'));
+    $wrapper_parents = array_merge($parents, array('iso-wrapper'));
     $wrapper_id = implode('-', $wrapper_parents);
 
     // Assist themers with floating DIVs.
@@ -339,7 +352,7 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
         'wrapper' => $wrapper_id,
       ),
     );
-
+    $first = array_shift($continent_parents);
     $element['iso2'] = array(
       '#type' => 'country',
       '#title' => t('Country'),
@@ -351,7 +364,7 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
       '#filters' => $settings,
       '#states' => array(
         'visible' => array(
-          ':input[name="' . $field_name . '[' . $langcode . '][' . $delta . '][continent]"]' => array('!value' => 'none'),
+          ':input[name="' . $first . '[' . implode('][', $continent_parents) . ']"]' => array('!value' => 'none'),
         ),
       ),
     );
@@ -367,6 +380,7 @@ function _ajax_countries_continent_widget_callback($form, $form_state) {
   array_pop($parents);
   $parents[] = 'iso2';
   $element = drupal_array_get_nested_value($form, $parents);
+
   return $element;
 }
 
