@@ -205,20 +205,16 @@ function countries_views_data() {
 function countries_field_views_data($field) {
   $data = field_views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
-    foreach ($table_data as $field_name => $field_data) {
-      if (!in_array($field_name, array('table', 'entity_id', 'revision_id'))) {
-        $data[$table_name][$field_name]['relationship'] = array(
-          'handler' => 'views_handler_relationship',
-          'base' => 'countries_country',
-          'base field' => 'iso2',
-          'label' => t('country from !field_name', array('!field_name' => $field['field_name'])),
-          'countries' => array(
-            'field' => $field['field_name'],
-          ),
-        );
-      }
-    }
+    // Add the relationship only on the iso2 field.
+    $data[$table_name][$field['field_name'] . '_iso2']['relationship'] = array(
+      'handler' => 'views_handler_relationship',
+      'base' => 'countries_country',
+      'base field' => 'iso2',
+      'label' => t('country from !field_name', array('!field_name' => $field['field_name'])),
+      'countries' => array(
+        'field' => $field['field_name'],
+      ),
+    );
   }
-
   return $data;
 }
