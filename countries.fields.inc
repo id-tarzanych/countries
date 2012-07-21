@@ -58,7 +58,9 @@ function countries_entity_metadata_field_property_get($entity, array $options, $
   $values = array();
   if (isset($entity->{$name}[$langcode])) {
     foreach ($entity->{$name}[$langcode] as $delta => $data) {
-      $values[$delta] = $data['country']->cid;
+      if (!empty($data['country'])) {
+        $values[$delta] = $data['country']->cid;
+      }
     }
   }
   // For an empty single-valued field, we have to return NULL.
@@ -73,8 +75,14 @@ function countries_field_prepare_view($entity_type, $entities, $field, $instance
     foreach ($items[$id] as $delta => $item) {
       if (!isset($item['country'])) {
         $items[$id][$delta]['value'] = $item['iso2'];
-        $items[$id][$delta]['country'] = country_load($item['iso2']);
-        $items[$id][$delta]['safe_value'] = check_plain($items[$id][$delta]['country']->name);
+        if (!empty($item['iso2']) && $country = country_load($item['iso2'])) {
+          $items[$id][$delta]['country'] = $country;
+          $items[$id][$delta]['safe_value'] = check_plain($items[$id][$delta]['country']->name);
+        }
+        else {
+          $items[$id][$delta]['country'] = FALSE;
+          $items[$id][$delta]['safe_value'] = '';
+        }
         // @todo: Remove post 7.x-2.x
         $items[$id][$delta]['safe'] = $items[$id][$delta]['safe_value'];
       }
@@ -244,7 +252,10 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
   );
   foreach ($items as $delta => $item) {
     $country = $item['country'];
-    if (isset($map[$display['type']])) {
+    if (empty($country)) {
+      continue;
+    }
+    elseif (isset($map[$display['type']])) {
       $element[$delta]['#markup'] = country_property($country, $map[$display['type']]);
     }
     elseif ($display['type'] == 'country_icon') {
