@@ -147,7 +147,7 @@ class CountriesBaseSetupTest extends DrupalWebTestCase {
       'MD' => t('Moldova, Republic of'),
       'MK' => t('Macedonia, The Former Yugoslav Republic of'),
       'MO' => t('Macao'),
-      'PS' => t('Palestinian Territory, Occupied'),
+      'PS' => t('Palestine, State of'),
       'RE' => t('Réunion'),
       'RU' => t('Russian Federation'),
       'SH' => t('Saint Helena, Ascension and Tristan da Cunha'),
