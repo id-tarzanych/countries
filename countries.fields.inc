@@ -300,6 +300,7 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
   if ($instance['widget']['type'] == 'countries_continent') {
     $field_name = $field['field_name'];
     $settings = $field['settings'];
+    $required = !empty($element['#required']);
     $continents = countries_get_continents();
 
     if (!empty($settings['continents'])) {
@@ -347,6 +348,7 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
       '#empty_option' => t('-- None selected --'),
       '#empty_value' => 'none',
       '#default_value' => $selected_continent,
+      '#required' => $required,
       '#ajax' => array(
         'callback' => '_ajax_countries_continent_widget_callback',
         'wrapper' => $wrapper_id,
@@ -362,6 +364,7 @@ function countries_field_widget_form(&$form, &$form_state, $field, $instance, $l
       '#empty_value' => '',
       '#hide_empty' => TRUE,
       '#filters' => $settings,
+      '#required' => $required,
       '#states' => array(
         'visible' => array(
           ':input[name="' . $first . '[' . implode('][', $continent_parents) . ']"]' => array('!value' => 'none'),
