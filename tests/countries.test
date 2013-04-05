@@ -632,9 +632,9 @@ class CountriesFunctionsUnitTest extends CountriesBaseSetupTest {
     );
     $passed_all = TRUE;
     foreach ($results as $key => $expected_results) {
-      $results = country_property($country, $key, 'xxx');
-      if ($results !== $expected_results) {
-        $this->fail('Country property using default failed on ' . $key . '. Found ' . $results . ', expected ' . $expected_results);
+      $actual_results = country_property($country, $key, 'xxx');
+      if ($actual_results !== $expected_results) {
+        $this->fail('Country property using default failed on ' . $key . '. Found ' . $actual_results . ', expected ' . $expected_results);
         $passed_all = FALSE;
       }
     }
@@ -826,14 +826,26 @@ class CountriesCRUDUIUnitTest extends CountriesBaseSetupTest {
     $this->assertNoRaw(t('Added country %country.', array('%country' => 'New Zealand')), 'New country was not added (validation)');
 
     // Individually test the invalid properties.
-    $valid_country = country_create(array(
+    $valid_country = (array)country_create(array(
       'iso2' => 'xb',
       'name' => 'A test xb',
       'official_name' => 'Official test for xb',
       'iso3' => 'Xab',
       'numcode' => '901',
     ));
-    unset($valid_country->cid);
+
+    // Filter out non-country schema based keys.
+    $valid_fields = drupal_map_assoc(array(
+      'iso2',
+      'iso3',
+      'name',
+      'official_name',
+      'numcode',
+      'continent',
+      'enabled',
+      'language',
+    ));
+    $valid_country = (object)array_intersect_key($valid_country, $valid_fields);
     $invalid_properties = array(
       'iso2' => array(
         '12', // numerical

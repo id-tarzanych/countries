@@ -123,7 +123,7 @@ function countries_menu() {
  *   The santitised country name.
  */
 function countries_page_title($country) {
-  return check_plain($country->name);
+  return check_plain($country->label());
 }
 
 
@@ -261,7 +261,7 @@ function countries_load_multiple($cids = array(), $conditions = array(), $reset 
  *   defined defaults.
  */
 function country_create($properties = array()) {
-  return (object) ($properties + array(
+  return entity_create('country', $properties + array(
     'cid' => NULL,
     'iso2' => '',
     'iso3' => '',
@@ -333,7 +333,7 @@ function country_validate(&$country) {
   $defaults = country_create();
 
   foreach (countries_core_properties() as $key => $label) {
-    $country->$key = isset($country->$key) ? trim($country->$key) : $defaults[$key];
+    $country->$key = isset($country->$key) ? trim($country->$key) : $defaults->{$key};
     if ($length = drupal_strlen($country->$key)) {
       if ($error = countries_property_invalid($key, $country->$key)) {
         $errors[$key] = $error;
@@ -665,7 +665,12 @@ function countries_get_countries($property = 'all', $filters = array()) {
   $mapped_countries = array();
   foreach ($filtered_countries as $country) {
     if (isset($country->$property)) {
-      $mapped_countries[$country->iso2] = $country->$property;
+      if ($property == 'name') {
+        $mapped_countries[$country->iso2] = $country->label();
+      }
+      else {
+        $mapped_countries[$country->iso2] = $country->$property;
+      }
     }
   }
   uasort($mapped_countries, 'countries_sort');
@@ -744,7 +749,11 @@ function country_property($country, $property, $default = NULL, $sanitize = TRUE
         $output = $country->official_name;
       }
       elseif (!isset($default)) {
-        $output = $country->name;
+        // Entity->label() returns an empty string if not set.
+        $output = $country->label();
+        if (!$output) {
+          $output = NULL;
+        }
       }
       break;
 
@@ -752,6 +761,14 @@ function country_property($country, $property, $default = NULL, $sanitize = TRUE
       // We do not need to sanitize this output.
       if (!empty($country->numcode)) {
         return theme('countries_number', array('country' => $country));
+      }
+      break;
+
+    case 'name':
+      // Entity->label() returns an empty string if not set.
+      $output = $country->label();
+      if (!$output) {
+        $output = NULL;
       }
       break;
 
@@ -868,7 +885,7 @@ function theme_country_icon_adapter($variables) {
     'code'    => $country->iso2,
     'iconset' => $icon_set_name,
     'alt'     => $country->iso2,
-    'title'   => $country->name,
+    'title'   => $country->label(),
   );
 
   $icon = '';
