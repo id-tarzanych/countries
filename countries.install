@@ -144,9 +144,9 @@ function countries_import_csv() {
     // The iso3 data.
     $row[1] = empty($row[1]) || $row[1] == 'NULL' ? '' : trim($row[1]);
     // The name data.
-    $row[2] = empty($row[2]) || $row[2] == 'NULL' ? '' : trim($row[2]);
+    $row[2] = empty($row[2]) || $row[2] == 'NULL' ? '' : $t(trim($row[2]));
     // The official name data.
-    $row[3] = empty($row[3]) || $row[3] == 'NULL' ? '' : trim($row[3]);
+    $row[3] = empty($row[3]) || $row[3] == 'NULL' ? '' : $t(trim($row[3]));
     // The number code data.
     $row[4] = empty($row[4]) || $row[4] == 'NULL' ? 0 : trim($row[4]);
     // The continent data.

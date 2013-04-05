@@ -472,12 +472,16 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
           }
         }
         elseif (empty($value) || $value == 'NULL') {
-          // Skip setting defaults until we check existing countries latter.
+          // Skip setting defaults until we check existing countries later.
         }
         elseif ($error = countries_property_invalid($key, $value)) {
           $errors[] = $error;
         }
         else {
+          if ($key == 'name' || $key == 'official_name') {
+            // Enable translation of country names during importation.
+            $value = t($value);
+          }
           $country->$key = $value;
         }
       }
@@ -507,6 +511,9 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
         }
         if (!isset($country->{$key})) {
           $country->{$key} = $existing ? $existing->{$key} : $default_value;
+        }
+        if ($key == 'name' || $key == 'official_name') {
+          $existing->{$key} = t($existing->{$key});
         }
         if ((string) $existing->{$key} !== (string) $country->{$key}) {
           $updates[$country->iso2][$key] = array('new' => $country->{$key}, 'old' => $existing->{$key});
