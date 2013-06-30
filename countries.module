@@ -162,9 +162,7 @@ function countries_countries_alter(&$countries) {
   if (empty($enabled_countries)) {
     $enabled_countries = countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED));
   }
-  $countries = array_intersect_key($enabled_countries, $countries);
-  $countries = array_merge($countries, array_diff_key($enabled_countries, $countries));
-  uasort($countries, 'countries_sort');
+  $countries = $enabled_countries;
 }
 
 /**
