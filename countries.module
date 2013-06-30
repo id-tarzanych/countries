@@ -1028,3 +1028,12 @@ function countries_apachesolr_display_callback($facet, $options) {
   }
   return '';
 }
+
+/**
+ * Callback for getting extra country properties.
+ *
+ * @see countries_entity_property_info_alter()
+ */
+function countries_get_properties($data = FALSE, array $options, $name) {
+  return country_property($data, $name);
+}

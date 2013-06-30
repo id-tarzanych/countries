@@ -23,48 +23,20 @@ function countries_field_info() {
       'default_formatter' => 'country_default',
       // Support hook_entity_property_info() from contrib "Entity API".
       'property_type' => 'country',
-      'property_callbacks' => array('countries_field_info_property_callback'),
+      'property_callbacks' => array('countries_entity_metadata_field_property_callback'),
     ),
   );
 }
 
 /**
- * Override the getter callback.
+ * Callback to add in property info defaults per field instance.
+ * @see entity_metadata_field_entity_property_info().
  */
-function countries_field_info_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
-  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
-  // Do not use the type "country" here because that would reference the entity
-  // type.
-  $property['type'] = ($field['cardinality'] != 1) ? 'list<countries>' : 'countries';
-  $property['getter callback'] = 'countries_entity_metadata_field_property_get';
-  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
-  $property['auto creation'] = 'entity_property_create_array';
-  $property['property info'] = array(
-    'iso2' => array(
-      'label' => t('ISO2 country code'),
-      'getter callback' => 'entity_property_verbatim_get',
-      'setter callback' => 'entity_property_verbatim_set',
-    ),
-  );
-}
-
-/**
- * Callback for getting field property values.
- */
-function countries_entity_metadata_field_property_get($entity, array $options, $name, $entity_type, $info) {
-  $field = field_info_field($name);
-  $columns = array_keys($field['columns']);
-  $langcode = field_language($entity_type, $entity, $name, isset($options['language']) ? $options['language']->language : NULL);
-  $values = array();
-  if (isset($entity->{$name}[$langcode])) {
-    foreach ($entity->{$name}[$langcode] as $delta => $data) {
-      if (!empty($data['country'])) {
-        $values[$delta] = $data['country']->cid;
-      }
-    }
-  }
-  // For an empty single-valued field, we have to return NULL.
-  return $field['cardinality'] == 1 ? ($values ? reset($values) : NULL) : $values;
+function countries_entity_metadata_field_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $name = $field['field_name'];
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+  entity_metadata_field_default_property_callback($info, $entity_type, $field, $instance, $field_type);
+  $property['options list'] = 'entity_metadata_field_options_list';
 }
 
 /**
