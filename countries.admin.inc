@@ -377,10 +377,8 @@ function countries_admin_import_form_submit($form, &$form_state) {
     foreach (array_filter($form_state['values']['inserts']) as $iso2) {
       $country = $form_state['inserts'][$iso2];
       if ($duplicates = country_duplicate_field_check($country)) {
-        $duplicates = array_unique(drupal_array_merge_deep_array($duplicates));
-
-        $skipped[] = t('Skipped @iso2 due to duplicate fields in: @duplicates',
-            array('@iso2' => $iso2, '@duplicates' => implode(', ', $duplicates)));
+        $skipped[] = t('Skipped @iso2 due to duplicate fields in:<br />!duplicates',
+            array('@iso2' => $iso2, '!duplicates' => implode('<br />', $duplicates)));
       }
       else {
         country_save($country);
@@ -404,9 +402,8 @@ function countries_admin_import_form_submit($form, &$form_state) {
         $country->{$key} = $value;
       }
       if ($duplicates = country_duplicate_field_check($country)) {
-        $duplicates = array_unique(drupal_array_merge_deep_array($duplicates));
-        $skipped[] = t('Skipped @iso2 due to duplicate fields in: @duplicates',
-            array('@iso2' => $iso2, '@duplicates' => implode(', ', $duplicates)));
+        $skipped[] = t('Skipped @iso2 due to duplicate fields in:<br />!duplicates',
+            array('@iso2' => $iso2, '!duplicates' => implode('<br />', $duplicates)));
       }
       else {
         country_save($country, $iso2);
@@ -608,10 +605,10 @@ function country_duplicate_field_check($country) {
       $value = $query->execute()->fetchColumn();
       if (!empty($value)) {
         $conflict = country_load($value);
-        $duplicates[$property] = t('The %value is already used by !country',
+        $duplicates[$property] = t('The <em>@value</em> is already used by <em>@country</em>',
             array(
-              '%value' => $country->$property,
-              '!country' => country_property($conflict, 'name'),
+              '@value' => country_property($country, $property),
+              '@country' => country_property($conflict, 'name'),
             ));
       }
     }
