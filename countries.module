@@ -929,6 +929,14 @@ function countries_country_expand($element) {
   return _countries_country_expand($element);
 }
 
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function countries_ctools_plugin_directory($module, $plugin) {
+  if (in_array($module, array('ctools')) && $plugin == 'arguments') {
+    return "plugins/$plugin";
+  }
+}
 
 /**
  * Implements hook_views_api().
