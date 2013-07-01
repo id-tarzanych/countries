@@ -105,6 +105,52 @@ The module implement hook_countries_alter() which updates any list generated
 using country_get_list() to filter out any disabled countries and adds the
 potential to rename these based on your personal or political preferences.
 
+To avoid potential clashes with future modifications to the ISO list, use one of
+the following user-assigned codes:
+
+Alpha-2: AA, QM to QZ, XA to XZ, and ZZ
+
+Optionally add other codes:
+
+Alpha-3: AAA to AAZ, QMA to QZZ, XAA to XZZ, and ZZA to ZZZ
+Numeric codes: There are no reserved numeric codes in the ISO 3166-1 standard.
+
+See http://en.wikipedia.org/wiki/ISO_3166-1 for more details
+
+Example one: Disable the UK and enable England, Scotland, Wales, Nth Ireland.
+
+The UK (United Kingdom) is a sovereign state that consists of the following
+countries England, Scotland, Wales and Northern Ireland. 
+
+a) Disable United Kingdom
+
+Go to admin/config/regional/countries and find and edit the UK.
+
+b) Add the other countries
+
+Go to admin/config/regional/countries/add and add the four countries
+
+Name: England / ISO Alpha-2 Code: XA / Continent: Europe
+- Optionally add others: ISO Alpha-3 Code: XAA, etc
+Name: Scotland / ISO Alpha-2 Code: XB / Continent: Europe
+- Optionally add others: ISO Alpha-3 Code: XBA, etc
+Name: Wales / ISO Alpha-2 Code: XC / Continent: Europe
+- Optionally add others: ISO Alpha-3 Code: XCA, etc
+Name: Northern Ireland / ISO Alpha-2 Code: XD / Continent: Europe
+- Optionally add others: ISO Alpha-3 Code: XDA, etc
+
+Example two: Custom lists with England, Scotland, Wales, Nth Ireland but no UK.
+
+For example, you wanted to add a list of countries playing Rugby Union but to
+leave the other country list as per the ISO standard.
+
+Do not disable the UK, rather add the other states as per example one, this time
+leave all Disabled.
+
+Create a new field and select what countries should be present. Ensure that the
+Country status is set to both, selecting all countries that play Rugby Union and
+make sure you exclude the UK.
+
 ## Developers note: ##
 
 There is no need to make this module a dependency unless you use the API or
