@@ -261,8 +261,10 @@ function countries_field_widget_info() {
  * Implements hook_field_widget_info_alter().
  */
 function countries_field_widget_info_alter(&$info) {
-  $info['options_buttons']['field types'][] = 'country';
-  $info['options_select']['field types'][] = 'country';
+  if (isset($info['options_buttons'])) {
+    $info['options_buttons']['field types'][] = 'country';
+    $info['options_select']['field types'][] = 'country';
+  }
 }
 
 /**
