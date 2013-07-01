@@ -1001,8 +1001,6 @@ function countries_apachesolr_map_callback(array $values) {
   foreach ($values as $value) {
     if ($country = country_load($value)) {
       $map[$value] = countries_t($country, 'name');
-      // ApacheSolr does no sanitation, so trust nothing.
-      $map[$value] = check_plain($map[$value]);
     }
   }
   return $map;
