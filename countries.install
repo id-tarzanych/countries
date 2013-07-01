@@ -107,6 +107,11 @@ function countries_field_schema($field) {
 function countries_install() {
   // Import the data.
   countries_import_csv();
+  $t = get_t();
+  drupal_set_message($t('Visit the countries !config_page to import the most recent changes from the ISO 3166-1 standard.',
+    array(
+      '!config_page' => l($t('configuration page'), 'admin/config/regional/countries/import'),
+    )));
 }
 
 /**
