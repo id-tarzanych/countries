@@ -960,6 +960,42 @@ function countries_migrate_api() {
 }
 
 /**
+ * Implements hook_action_info().
+ */
+function countries_action_info() {
+  return array(
+    'country_enable_action' => array(
+      'type' => 'country',
+      'label' => t('Enable country'),
+      'configurable' => FALSE,
+      'behavior' => array('changes_property'),
+    ),
+    'country_disable_action' => array(
+      'type' => 'country',
+      'label' => t('Disable country'),
+      'configurable' => FALSE,
+      'behavior' => array('changes_property'),
+    ),
+  );
+}
+
+/**
+ * Enable country action
+ */
+function country_enable_action($country, $context = array()) {
+  $country->enabled = 1;
+  country_save($country);
+}
+
+/**
+ * Disable country action
+ */
+function country_disable_action($country, $context = array()) {
+  $country->enabled = 0;
+  country_save($country);
+}
+
+/**
  * Implements hook_apachesolr_field_mappings().
  */
 function countries_apachesolr_field_mappings() {
