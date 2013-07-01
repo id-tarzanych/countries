@@ -139,10 +139,12 @@ Name: Wales / ISO Alpha-2 Code: XC / Continent: Europe
 Name: Northern Ireland / ISO Alpha-2 Code: XD / Continent: Europe
 - Optionally add others: ISO Alpha-3 Code: XDA, etc
 
+All default lists will hide the UK and show the other countries.
+
 Example two: Custom lists with England, Scotland, Wales, Nth Ireland but no UK.
 
 For example, you wanted to add a list of countries playing Rugby Union but to
-leave the other country list as per the ISO standard.
+leave the other country lists as per the ISO standard.
 
 Do not disable the UK, rather add the other states as per example one, this time
 leave all Disabled.
