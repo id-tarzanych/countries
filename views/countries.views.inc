@@ -48,7 +48,7 @@ function countries_views_data() {
       'handler' => 'views_handler_filter_string',
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_string',
+      'handler' => 'views_handler_argument_countries_country',
     ),
   );
 
@@ -77,7 +77,7 @@ function countries_views_data() {
       'property' => 'iso3',
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_string',
+      'handler' => 'views_handler_argument_countries_country',
     ),
   );
 
@@ -105,7 +105,7 @@ function countries_views_data() {
       'handler' => 'views_handler_filter_string',
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_string',
+      'handler' => 'views_handler_argument_countries_country',
     ),
   );
 
@@ -133,7 +133,7 @@ function countries_views_data() {
       'handler' => 'views_handler_filter_string',
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_string',
+      'handler' => 'views_handler_argument_countries_country',
     ),
   );
 
