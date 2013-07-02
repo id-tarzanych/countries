@@ -211,8 +211,8 @@ function countries_views_data_alter(&$data) {
     foreach (array_keys($country_fields) as $name) {
       // Check on field storage type prevents warnings on non-sql field storage.
       if (isset($field[$name]) && $country_fields[$name]['storage']['type'] == 'field_sql_storage') {
-        $data[$field_name][$name]['help'] = (empty($data[$field_name][$name]) ? '' : $data[$field_name][$name] . ' ')
-          . t('If you need more fields add a country relationship.');
+        $title = empty($data[$field_name][$name]['title']) ? '' : $data[$field_name][$name]['title'] . ' ';
+        $data[$field_name][$name]['help'] = $title . t('If you need more fields add a country relationship.');
       }
     }
   }
