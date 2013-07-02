@@ -269,7 +269,7 @@ function countries_admin_delete_submit($form, &$form_state) {
   country_delete($country->iso2);
 
   drupal_set_message(t('Deleted country %country.', array('%country' => $country->name)));
-  $form_state['redirect'] = 'admin/config/content/countries';
+  $form_state['redirect'] = 'admin/config/regional/countries';
 }
 
 /**
