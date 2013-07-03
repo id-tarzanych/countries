@@ -376,7 +376,7 @@ function countries_admin_import_form_submit($form, &$form_state) {
             array('@iso2' => $iso2, '!duplicates' => implode('<br />', $duplicates)));
       }
       else {
-        country_save($country);
+        country_save($country, FALSE);
         $inserted[] = l($country->name, 'admin/config/regional/countries/' . $country->iso2);
       }
     }
@@ -401,7 +401,7 @@ function countries_admin_import_form_submit($form, &$form_state) {
             array('@iso2' => $iso2, '!duplicates' => implode('<br />', $duplicates)));
       }
       else {
-        country_save($country);
+        country_save($country, FALSE);
         $updated[] = l($country->name, 'admin/config/regional/countries/' . $country->iso2);
       }
     }
@@ -412,6 +412,9 @@ function countries_admin_import_form_submit($form, &$form_state) {
 
   if (empty($inserted) && empty($updated)) {
     drupal_set_message(t('No changes to the countries database were done.'));
+  }
+  else {
+    countries_clear_caches();
   }
 
   if (!empty($skipped)) {

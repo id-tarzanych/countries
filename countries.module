@@ -374,11 +374,18 @@ function country_validate(&$country) {
  * @param object $country
  *   The country object to save.
  *
+ * @param bool $clear_cache
+ *   A flag to prevent cache flushes.
+ *
  * @return int
  *   SAVED_NEW or SAVED_UPDATED is returned depending on the operation.
  */
-function country_save(&$country) {
-  return entity_save('country', $country);
+function country_save(&$country, $clear_cache = TRUE) {
+  $result = entity_save('country', $country);
+  if ($clear_cache) {
+    countries_clear_caches();
+  }
+  return $result;
 }
 
 /**
@@ -387,13 +394,20 @@ function country_save(&$country) {
  * @param string $iso2
  *   The countries ISO alpha-2 code.
  *
+ * @param bool $clear_cache
+ *   A flag to prevent cache flushes.
+ *
  * @return mixed
  *   There is no standard result from this callback. However, FALSE would almost
  *   certainly indicate a failure.
  */
-function country_delete($iso2) {
+function country_delete($iso2, $clear_cache = TRUE) {
   $iso2 = drupal_strtoupper($iso2);
-  return entity_delete('country', $iso2);
+  $result = entity_delete('country', $iso2);
+  if ($clear_cache) {
+    countries_clear_caches();
+  }
+  return $result;
 }
 
 /**
@@ -409,6 +423,16 @@ function country_is_locked($country) {
   include_once DRUPAL_ROOT . '/includes/iso.inc';
   $countries = _country_get_predefined_list();
   return !empty($country->iso2) && array_key_exists($country->iso2, $countries);
+}
+
+/**
+ * Helper function to clear various caches.
+ */
+function countries_clear_caches() {
+  drupal_static('countries_get_countries', NULL, TRUE);
+  drupal_static('countries_get_continents', NULL, TRUE);
+  drupal_static('countries_countries_alter', NULL, TRUE);
+  entity_get_controller('country')->resetCache();
 }
 
 /**
