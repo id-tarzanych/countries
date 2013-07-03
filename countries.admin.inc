@@ -223,12 +223,7 @@ function countries_admin_form_submit($form, &$form_state) {
   $country = (object) $form_state['values'];
   entity_form_submit_build_entity('country', $country, $form, $form_state);
 
-  // Required to trigger an update.
-  $iso2 = isset($form['#country']) ? $form['#country']->iso2 : FALSE;
-
-  country_save($country, $iso2);
-
-  if ($iso2) {
+  if (country_save($country) == SAVED_UPDATED) {
     $message = t('The country %country has been updated.', array('%country' => $country->name));
   }
   else {
@@ -406,7 +401,7 @@ function countries_admin_import_form_submit($form, &$form_state) {
             array('@iso2' => $iso2, '!duplicates' => implode('<br />', $duplicates)));
       }
       else {
-        country_save($country, $iso2);
+        country_save($country);
         $updated[] = l($country->name, 'admin/config/regional/countries/' . $country->iso2);
       }
     }

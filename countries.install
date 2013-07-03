@@ -120,6 +120,7 @@ function countries_install() {
 function countries_uninstall() {
   variable_del('countries_continents');
   variable_del('countries_csv_datasource');
+  variable_del('countries_admin_overview_columns');
 }
 
 

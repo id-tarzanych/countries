@@ -392,6 +392,7 @@ function country_save(&$country) {
  *   certainly indicate a failure.
  */
 function country_delete($iso2) {
+  $iso2 = drupal_strtoupper($iso2);
   return entity_delete('country', $iso2);
 }
 
