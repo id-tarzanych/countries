@@ -104,7 +104,7 @@ function example_address_country_admin_form($country, $values, &$form) {
  *   This is run through check_plain() so there is no need to escape the name.
  */
 function example_address_country_admin_form_title($country) {
-  return t('Edit !name address options', array('!name' => $country->name));
+  return t('Edit !name address options', array('!name' => $country->label()));
 }
 
 /**
@@ -120,6 +120,6 @@ function example_address_country_configuration_usage($country) {
   $settings = countries_configuration($country, 'address');
   drupal_set_message(t('Editting the %region for %country', array(
     '%region' => $settings['labels']['region'],
-    '%country' => $country->name,
+    '%country' => $country->label(),
   )));
 }

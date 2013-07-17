@@ -12,6 +12,7 @@ function countries_field_diff_view($items, $context) {
   $field = $context['field'];
   $instance = $context['instance'];
   $settings = $context['settings'];
+  $langcode = $context['language'];
 
   $diff_items = array();
   foreach ($items as $delta => $item) {
@@ -23,10 +24,10 @@ function countries_field_diff_view($items, $context) {
     switch ($settings['format']) {
       case 'country_official':
         if (!empty($country->official_name)) {
-          $diff_items[$delta] = $country->official_name;
+          $diff_items[$delta] = country_property($country, 'official_name', array('langcode' => $langcode, 'sanitize' => FALSE));
         }
         else {
-          $diff_items[$delta] = $country->name;
+          $diff_items[$delta] = country_property($country, 'name', array('langcode' => $langcode, 'sanitize' => FALSE));
         }
         break;
 
@@ -44,7 +45,7 @@ function countries_field_diff_view($items, $context) {
 
       case 'country_default':
       default:
-        $diff_items[$delta] = $country->name;
+        $diff_items[$delta] = country_property($country, 'name', array('langcode' => $langcode, 'sanitize' => FALSE));
         break;
     }
     if (!empty($settings['append_iso'])) {

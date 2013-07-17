@@ -43,13 +43,20 @@ function countries_entity_metadata_field_property_callback(&$info, $entity_type,
  * Implements hook_field_prepare_view().
  */
 function countries_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  global $language_content;
   foreach ($entities as $id => $entity) {
+    if ($langcode == LANGUAGE_NONE) {
+      $field_language = $entity ? $entity->language : $language_content->language;
+    }
+    else {
+      $field_language = $langcode;
+    }
     foreach ($items[$id] as $delta => $item) {
       if (!isset($item['country'])) {
         $items[$id][$delta]['value'] = $item['iso2'];
         if (!empty($item['iso2']) && $country = country_load($item['iso2'])) {
           $items[$id][$delta]['country'] = $country;
-          $items[$id][$delta]['safe_value'] = check_plain($items[$id][$delta]['country']->name);
+          $items[$id][$delta]['safe_value'] = country_property($country, 'name', array('langcode' => $field_language));
         }
         else {
           $items[$id][$delta]['country'] = FALSE;
@@ -213,8 +220,11 @@ function countries_field_formatter_settings_form($field, $instance, $view_mode, 
  * Implements hook_field_formatter_view().
  */
 function countries_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  global $language_content;
+
   $element = array();
   $map = array(
+    'country_default' => 'name',
     'country_official' => 'official_name',
     'country_alpha_2' => 'iso2',
     'country_alpha_3' => 'iso3',
@@ -222,18 +232,25 @@ function countries_field_formatter_view($entity_type, $entity, $field, $instance
     'country_continent' => 'continent',
     'country_continent_code' => 'continent_code',
   );
+  if ($langcode == LANGUAGE_NONE) {
+    $field_language = $entity ? $entity->language : $language_content->language;
+  }
+  else {
+    $field_language = $langcode;
+  }
   foreach ($items as $delta => $item) {
     $country = $item['country'];
     if (empty($country)) {
       continue;
     }
     elseif (isset($map[$display['type']])) {
-      $element[$delta]['#markup'] = country_property($country, $map[$display['type']]);
+      $element[$delta]['#markup'] = country_property($country, $map[$display['type']], array('langcode' => $field_language));
     }
     elseif ($display['type'] == 'country_icon') {
       $variables = array(
         'country' => $country,
         'settings' => $display['settings'],
+        'langcode' => $field_language,
       );
       $element[$delta]['#markup'] = theme('country_icon_adapter', $variables);
     }

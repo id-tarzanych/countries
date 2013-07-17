@@ -80,17 +80,18 @@ America, Oceania, South America). An enabled flag defines a countries status.
  
 For example, Taiwan has the following values:
 
- * Name           - Taiwan
- * Offical name   - Taiwan, Republic of China
- * ISO alpha-2    - TW
- * ISO alpha-3    - TWN
- * ISO numeric-3  - 158
- * Continent      - Asia
+ * Name           - Australia
+ * Offical name   - Commonwealth of Australia
+ * ISO alpha-2    - AU
+ * ISO alpha-3    - AUS
+ * ISO numeric-3  - 36
+ * Continent      - Oceania
  * Enabled        - Yes
 
 The official names were originally taken from WikiPedia [2] and the majority of
-the continent information was imported from Country codes API project [3]. This
-have been since standardised with the ISO 3166-1 standard. 
+the continent information was imported from Country codes API project [3].
+
+This have been since standardised with the ISO 3166-1 standard. 
 
 Country updates are added when the ISO officially releases these. This process
 may be up to 2 - 6 months. South Sudans inclusion took around a month. Kosovo
@@ -405,15 +406,17 @@ $country = countries_country_lookup($value);
 $country = countries_country_lookup($value, $property);
 
 # 3 - Get a countries name
+Note that $country->label() is equivalent to $country->name unless you have
+an i18n site.
 
 // The recommended method for an existing country using ISO 2 code
-$name = country_load($iso2)->name;
+$name = country_load($iso2)->label();
 
 // If the ISO 2 code can not be trusted:
-$name = ($country = country_load($iso2) ? $country->name : '');
+$name = ($country = country_load($iso2) ? $country->label() : '');
 
 // Any property (iso2, iso3, num code or name) supplied by an end user
-$name = $country = countries_country_lookup($value) ? $country->name : '';
+$name = $country = countries_country_lookup($value) ? $country->label() : '';
 
 # 4 - Toggle between ISO character codes
 $iso3 = country_load($iso2)->iso3;
@@ -426,7 +429,7 @@ $list = countries_get_countries($list_option_property);
 // Other lists that are keyed differently would need to be generated manually.
 $list = array();
 foreach (countries_get_countries() as $country) {
-  $list[$country->numcode] = $country->name;
+  $list[$country->numcode] = $country->label();
 }
 
 $standard_list = array('' => t('Please Choose')) + countries_get_countries('name');
@@ -463,7 +466,7 @@ Countries 7.x-1.x to 7.x-2.x
    Use country_load() instead.
 
 3) countries_get_countries() will throw an Exception if you attempt to
-   use it to lookup an invalid property.
+   use it to lookup an invalid property (latter removed in 7.x-2.2).
 
 4) CRUD functions have been completely refactored.
 

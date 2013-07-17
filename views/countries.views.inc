@@ -95,8 +95,9 @@ function countries_views_data() {
     'title' => t('Name'),
     'help' => t('The name of the country.'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_countries',
       'click sortable' => TRUE,
+      'additional fields' => array('iso2'),
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -123,7 +124,8 @@ function countries_views_data() {
     'title' => t('Official name'),
     'help' => t('The official name of the country.'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_countries',
+      'additional fields' => array('iso2'),
       'click sortable' => TRUE,
     ),
     'sort' => array(

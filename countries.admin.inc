@@ -9,6 +9,7 @@
  * Menu callback; Displays a list of all countries.
  */
 function countries_admin_overview() {
+  global $language;
   $header = array();
   $header[] = array('data' => t('Name'), 'field' => 'c.name', 'sort' => 'asc');
   $header[] = array('data' => t('ISO alpha-2 code'), 'field' => 'c.iso2');
@@ -35,32 +36,50 @@ function countries_admin_overview() {
 
   $destination = drupal_get_destination();
 
+  // Show db and translated strings if supported.
+  $i18n = (language_default('language') != $language->language)
+      && module_exists('countries_i18n');
+
   $rows = array();
   // Note that additional id's are added for testing.
   foreach ($result as $country) {
     $row = array();
-    $row[] = l($country->name, 'admin/config/regional/countries/' . $country->iso2, array('query' => $destination));
+    $base_url = 'admin/config/regional/countries/' . $country->iso2;
+    $name = country_property($country, 'name', array('sanitize' => 0));
+    $row[] = l($name, $base_url, array('query' => $destination))
+        . ($i18n ? '<br/><small>(' . check_plain($country->name) . ')</small>' : '');
     $row[] = array(
       'data' => country_property($country, 'iso2'),
       'id' => $country->iso2 . '-iso2',
     );
     foreach ($columns as $key => $title) {
-      $row[] = array(
-        'data' => country_property($country, $key, ''),
-        'id' => $country->iso2 . '-' . $key,
-      );
+      switch ($key) {
+        case 'official_name':
+          $value = country_property($country, $key, array('default' => ''));
+          $row[] = array(
+            'data' => $value . (($i18n && !empty($country->$key)) ? '<br/><small>(' . check_plain($country->$key) . ')</small>' : ''),
+            'id' => $country->iso2 . '-' . $key,
+          );
+          break;
+
+        default:
+          $row[] = array(
+            'data' => country_property($country, $key, array('default' => '')),
+            'id' => $country->iso2 . '-' . $key,
+          );
+      }
     }
     $row[] = array(
       'data' => country_property($country, 'enabled'),
       'id' => $country->iso2 . '-enabled',
     );
-    $operations = l(t('edit'), 'admin/config/regional/countries/' . $country->iso2, array('query' => $destination));
+    $operations = l(t('edit'), $base_url, array('query' => $destination));
     if (module_exists('countries_regions')) {
       $count = countries_regions_count($country);
-      $operations .= '&nbsp;&nbsp;&nbsp;' . l(t('!count regions', array('!count' => $count)), 'admin/config/regional/countries/' . $country->iso2 . '/regions', array('query' => $destination));
+      $operations .= '&nbsp;&nbsp;&nbsp;' . l(t('!count regions', array('!count' => $count)), $base_url . '/regions', array('query' => $destination));
     }
     if (!country_is_locked($country)) {
-      $operations .= '&nbsp;&nbsp;&nbsp;' . l(t('delete'), 'admin/config/regional/countries/' . $country->iso2 . '/delete', array('query' => $destination));
+      $operations .= '&nbsp;&nbsp;&nbsp;' . l(t('delete'), $base_url . '/delete', array('query' => $destination));
     }
     $row[] = $operations;
     $rows[] = $row;
@@ -195,14 +214,14 @@ function countries_admin_form_validate($form, &$form_state) {
       form_set_error('iso2',
         t('Another country was found with this ISO alpha-2 code; !link',
         array(
-          '!link' => l(countries_t($existing),
+          '!link' => l(country_property($existing),
           'admin/config/regional/countries/' . $existing->iso2),
         )));
       return;
     }
     elseif ($existing->iso2 != $form['#country']->iso2) {
       form_set_error('iso2', t('Another country was found with this ISO alpha-2 code; !link',
-        array('!link' => l(countries_t($existing), 'admin/config/regional/countries/' . $existing->iso2))));
+        array('!link' => l(country_property($existing), 'admin/config/regional/countries/' . $existing->iso2))));
       return;
     }
   }
@@ -433,7 +452,7 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
     $file = variable_get('countries_csv_datasource',
         drupal_get_path('module', 'countries') . '/countries.csv');
   }
-
+  $langcode = language_default('language');
   $defaults += array(
     'name' => '',
     'official_name' => '',
@@ -442,6 +461,7 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
     'iso3' => '',
     'numcode' => 0,
     'continent' => 'UN',
+    'language' => $langcode,
   );
   $countries = array();
 
@@ -475,7 +495,7 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
         else {
           if ($key == 'name' || $key == 'official_name') {
             // Enable translation of country names during importation.
-            $value = t($value);
+            $value = t($value, array(), array('langcode' => $langcode));
           }
           $country->$key = $value;
         }
@@ -508,7 +528,7 @@ function countries_csv_updates($file = NULL, $defaults = array()) {
           $country->{$key} = $existing ? $existing->{$key} : $default_value;
         }
         if ($key == 'name' || $key == 'official_name') {
-          $existing->{$key} = t($existing->{$key});
+          $existing->{$key} = ($existing->language == $langcode) ? $existing->{$key} : t($existing->{$key}, array(), array('langcode' => $langcode));
         }
         if ((string) $existing->{$key} !== (string) $country->{$key}) {
           $updates[$country->iso2][$key] = array('new' => $country->{$key}, 'old' => $existing->{$key});

@@ -5,6 +5,7 @@ core = 7.x
 
 files[] = views/views_handler_argument_countries_country.inc
 files[] = views/views_handler_field_countries_continent.inc
+files[] = views/views_handler_field_countries.inc
 files[] = views/views_handler_filter_countries_continents_list.inc
 files[] = views/views_handler_filter_countries_list.inc
 files[] = countries.migrate.inc

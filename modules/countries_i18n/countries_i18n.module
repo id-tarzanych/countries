@@ -148,14 +148,14 @@ function countries_i18n_field_formatter_view($entity_type, $entity, $field, $ins
     case 'country_default_i18n':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
-          '#markup' => check_plain(countries_i18n_translate($item['iso2'], 'name', $item['safe_value'])),
+          '#markup' => check_plain(countries_i18n_translate($item['iso2'], 'name', $item['country']->name)),
         );
       }
       break;
 
     case 'country_official_i18n':
       foreach ($items as $delta => $item) {
-        $official_name = isset($item['country']->official_name) ? $item['country']->official_name : $item['safe_value'];
+        $official_name = isset($item['country']->official_name) ? $item['country']->official_name : $item['country']->name;
         $element[$delta] = array(
           '#markup' => check_plain(countries_i18n_translate($item['iso2'], 'official_name', $official_name)),
         );

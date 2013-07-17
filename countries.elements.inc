@@ -90,7 +90,8 @@ function _countries_country_expand($element) {
     if (empty($element['#filters'])) {
       $element['#filters']['enabled'] = COUNTRIES_ENABLED;
     }
-    $element['#options'] = countries_get_countries('name');
+    $options = empty($element['#langcode']) ? array() : array('langcode' => $element['#langcode']);
+    $element['#options'] = countries_get_countries('name', array(), $options);
   }
   $element['#options'] = countries_filter($element['#options'], $element['#filters']);
 

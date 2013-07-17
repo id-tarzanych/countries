@@ -126,29 +126,41 @@ function countries_page_title($country) {
   return check_plain($country->label());
 }
 
-
 /**
  * Wrapper function to hook into the countries_i18n module.
  */
-function countries_t($country, $property = 'name', $langcode = NULL, $type = 'country') {
+function countries_t($country, $property = 'name', $langcode = NULL) {
+  // If not specified, we use the global interface language, $language, rather
+  // than the global content language, $language_content.
+  global $language;
+  // @todo investigate if we can get LANGUAGE_NONE here.
+  if (empty($langcode) || $langcode == LANGUAGE_NONE) {
+    $langcode = $language->language;
+  }
+
   static $i18n = NULL;
   if (!isset($i18n)) {
     $i18n = module_exists('countries_i18n');
   }
+
   switch ($property) {
     case 'name':
-      $value = $country->name;
-      break;
-
     case 'official_name':
-      $value = empty($country->official_name) ? '' : $country->official_name;
-      break;
+      $value = (string) $country->$property;
+      // Only translate as required.
+      if ($i18n && $country->language != $langcode) {
+        $translations = &drupal_static(__FUNCTION__, array());
+        $key = $country->iso2 . ':' . $langcode . ':' . $property;
+        if (!isset($translations[$key])) {
+          $translations[$key] = countries_i18n_translate($country->iso2, $property, $value, $langcode, 'country');
+        }
+        return $translations[$key];
+      }
+      return $value;
 
     default:
       return isset($country->$property) ? $country->$property : '';
   }
-
-  return $i18n ? countries_i18n_translate($country->iso2, $property, $value, $langcode, $type) : $value;
 }
 
 /**
@@ -156,11 +168,13 @@ function countries_t($country, $property = 'name', $langcode = NULL, $type = 'co
  *
  * Currently the only usage in core is in system module when setting the sites
  * default country.
+ *
+ * Caution: Results are not sanitized.
  */
 function countries_countries_alter(&$countries) {
   $enabled_countries = &drupal_static(__FUNCTION__, array());
   if (empty($enabled_countries)) {
-    $enabled_countries = countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED));
+    $enabled_countries = countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED), array('sanitize' => FALSE));
   }
   $countries = $enabled_countries;
 }
@@ -195,6 +209,11 @@ function countries_entity_info() {
         'full' => array(
           'label' => t('Country'),
           'custom settings' => FALSE,
+        ),
+      ),
+      'translation' => array(
+        'entity_translation' => array(
+          'base path' => 'admin/config/regional/countries/%country',
         ),
       ),
     ),
@@ -301,8 +320,8 @@ function countries_get_country($iso2) {
 /**
  * Validates a country.
  *
- * Validates and normalises the core country properties. Note that this requires
- * the cid to test updates valids correctly.
+ * Validates and normalises the core country properties. Note that this
+ * requires the cid to test updates valids correctly.
  *
  * @code
  *   if (country_validate($country)) {
@@ -429,9 +448,10 @@ function country_is_locked($country) {
  * Helper function to clear various caches.
  */
 function countries_clear_caches() {
-  drupal_static('countries_get_countries', NULL, TRUE);
-  drupal_static('countries_get_continents', NULL, TRUE);
-  drupal_static('countries_countries_alter', NULL, TRUE);
+  drupal_static_reset('countries_t');
+  drupal_static_reset('countries_get_countries');
+  drupal_static_reset('countries_get_continents');
+  drupal_static_reset('countries_countries_alter');
   entity_get_controller('country')->resetCache();
 }
 
@@ -446,15 +466,17 @@ function countries_clear_caches() {
  *
  * @see countries_get_default_continents()
  */
-function countries_get_continents() {
+function countries_get_continents($t_options = array()) {
   $continents = &drupal_static(__FUNCTION__, array());
-  if (empty($continents)) {
-    $continents = variable_get('countries_continents', countries_get_default_continents());
-    $known = countries_known_continents();
-    $continents = array_intersect_key($known, $continents) + array_diff_key($continents, $known);
-    uasort($continents, 'countries_sort');
+  global $language;
+  $langcode = empty($t_options['langcode']) ? $language->language : $t_options['langcode'];
+  if (empty($continents[$langcode])) {
+    $continents[$langcode] = variable_get('countries_continents', countries_get_default_continents($t_options));
+    $known = countries_known_continents($t_options);
+    $continents[$langcode] = array_intersect_key($known, $continents[$langcode]) + array_diff_key($continents[$langcode], $known);
+    uasort($continents[$langcode], 'countries_sort');
   }
-  return $continents;
+  return $continents[$langcode];
 }
 
 /**
@@ -469,41 +491,41 @@ function countries_get_continents() {
  *
  * Please submit an issue if you want other continents added to this list.
  */
-function countries_known_continents() {
-  return countries_get_default_continents() + array(
-    'AE' => t('Afro-Eurasia'),
+function countries_known_continents($t_options = array()) {
+  return countries_get_default_continents($t_options) + array(
+    'AE' => t('Afro-Eurasia', array(), $t_options),
 
-    '1S' => t('Southern Africa'),
-    '1W' => t('Western Africa'),
-    '1N' => t('Northern Africa'),
-    '1M' => t('Middle Africa'),
-    '1E' => t('Eastern Africa'),
+    '1S' => t('Southern Africa', array(), $t_options),
+    '1W' => t('Western Africa', array(), $t_options),
+    '1N' => t('Northern Africa', array(), $t_options),
+    '1M' => t('Middle Africa', array(), $t_options),
+    '1E' => t('Eastern Africa', array(), $t_options),
 
-    '2S' => t('Southern Asia'),
-    '2W' => t('Western Asia'),
-    '2Z' => t('South-Eastern Asia'),
-    '2E' => t('Eastern Asia'),
-    '2C' => t('Central Asia'),
-    'IC' => t('Indian subcontinent'),
-    '2M' => t('Middle East'),
-    '2G' => t('Greater Middle East'),
+    '2S' => t('Southern Asia', array(), $t_options),
+    '2W' => t('Western Asia', array(), $t_options),
+    '2Z' => t('South-Eastern Asia', array(), $t_options),
+    '2E' => t('Eastern Asia', array(), $t_options),
+    '2C' => t('Central Asia', array(), $t_options),
+    'IC' => t('Indian subcontinent', array(), $t_options),
+    '2M' => t('Middle East', array(), $t_options),
+    '2G' => t('Greater Middle East', array(), $t_options),
 
-    '3S' => t('Southern Europe'),
-    '3W' => t('Western Europe'),
-    '3E' => t('Eastern Europe'),
-    '3N' => t('Northern Europe'),
-    'CE' => t('Continental Europe'),
-    'ER' => t('Eurasia'),
+    '3S' => t('Southern Europe', array(), $t_options),
+    '3W' => t('Western Europe', array(), $t_options),
+    '3E' => t('Eastern Europe', array(), $t_options),
+    '3N' => t('Northern Europe', array(), $t_options),
+    'CE' => t('Continental Europe', array(), $t_options),
+    'ER' => t('Eurasia', array(), $t_options),
 
-    'AM' => t('Americas'),
-    'CA' => t('Caribbean'),
-    'AC' => t('Central America'),
+    'AM' => t('Americas', array(), $t_options),
+    'CA' => t('Caribbean', array(), $t_options),
+    'AC' => t('Central America', array(), $t_options),
 
-    'AU' => t('Australasia'),
-    'AZ' => t('Australia and New Zealand'),
-    'PO' => t('Polynesia'),
-    'ME' => t('Melanesia'),
-    'MI' => t('Micronesia'),
+    'AU' => t('Australasia', array(), $t_options),
+    'AZ' => t('Australia and New Zealand', array(), $t_options),
+    'PO' => t('Polynesia', array(), $t_options),
+    'ME' => t('Melanesia', array(), $t_options),
+    'MI' => t('Micronesia', array(), $t_options),
   );
 }
 
@@ -512,16 +534,16 @@ function countries_known_continents() {
  *
  * @see countries_get_continents()
  */
-function countries_get_default_continents() {
+function countries_get_default_continents($t_options = array()) {
   return array(
-    'AF' => t('Africa'),
-    'AS' => t('Asia'),
+    'AF' => t('Africa', array(), $t_options),
+    'AS' => t('Asia', array(), $t_options),
     'EU' => t('Europe'),
-    'NA' => t('North America'),
-    'SA' => t('South America'),
-    'OC' => t('Oceania'),
-    'AN' => t('Antarctica'),
-    'UN' => t('Unknown', array(), array('context' => 'countries')),
+    'NA' => t('North America', array(), $t_options),
+    'SA' => t('South America', array(), $t_options),
+    'OC' => t('Oceania', array(), $t_options),
+    'AN' => t('Antarctica', array(), $t_options),
+    'UN' => t('Unknown', array(), $t_options + array('context' => 'countries')),
   );
 }
 
@@ -621,8 +643,8 @@ function countries_sort($a, $b) {
 /**
  * Helper function to transliterate names.
  *
- * This will integrate with the transliteration module if present, falling back
- * to a reduced character list otherwise.
+ * This will integrate with the transliteration module if present, falling
+ * back to a reduced character list otherwise.
  */
 function countries_transliterate($word) {
   static $words = array();
@@ -665,10 +687,13 @@ function countries_invoke_additional_countries_alter(&$countries) {
  * @param array $filters
  *   An array of filters. See countries_filter() for details.
  *
+ * @param array $options
+ *   An array of options. See country_property() for details.
+ *
  * @return array
  *   An array of countries ordered by name or by the specified property.
  */
-function countries_get_countries($property = 'all', $filters = array()) {
+function countries_get_countries($property = 'all', $filters = array(), $options = array()) {
   $countries = entity_load_multiple_by_name('country');
 
   $filtered_countries = countries_filter($countries, $filters);
@@ -677,24 +702,9 @@ function countries_get_countries($property = 'all', $filters = array()) {
     return $filtered_countries;
   }
 
-  $core_properties = countries_core_properties();
-  if (!isset($core_properties[$property])) {
-    $test = current($countries);
-    if (!isset($test->$property)) {
-      throw new Exception(t('Invalid property lookup in countries_get_countries()'));
-    }
-  }
-
   $mapped_countries = array();
   foreach ($filtered_countries as $country) {
-    if (isset($country->$property)) {
-      if ($property == 'name') {
-        $mapped_countries[$country->iso2] = $country->label();
-      }
-      else {
-        $mapped_countries[$country->iso2] = $country->$property;
-      }
-    }
+    $mapped_countries[$country->iso2] = country_property($country, $property, $options);
   }
   uasort($mapped_countries, 'countries_sort');
   return $mapped_countries;
@@ -725,30 +735,52 @@ function countries_core_properties() {
 /**
  * Helper function to help standardise the display of the core properties.
  *
+ * Translatable strings are translated if possible and fallback strings
+ * are provided for the official name property.
+ *
  * @param object $country
  *   A country object.
+ *
  * @param string $property
  *   The requested property.
- * @param string $default
- *   The default value to use if the property is not set or it is empty.
  *
- *   The cid and enabled flags ignore defaults. The cid value is always returned
- *   raw and enabled is either Enabled or Disabled strings.
- *
- * @param bool $sanitize
- *   Boolean to indicate whether an HTML safe version is required.
+ * @param array $options
+ *   A number if configurable options including:
+ *   - default: Default value to use if not set.
+ *   - sanitize: Boolean to indicate whether an HTML safe version is required.
+ *   - langcode: The required langauge for any translations.
  *
  * @return string|int
  *   Integer cid or string representation of other properties.
  */
-function country_property($country, $property, $default = NULL, $sanitize = TRUE) {
+function country_property($country, $property = 'name', $options = array()) {
+  // Temporary wrapper for the API change between 7.x-2.1 and 7.x-2.2
+  // @todo Remove in 8.x and any 7.x-3.x branches.
+  $args = func_get_args();
+  if (!is_array($options)) {
+    $options = array(
+      'default' => $options,
+    );
+  }
+  if (isset($args[3])) {
+    $options['sanitize'] = $args[3];
+  }
+  $options += array(
+    'default' => NULL,
+    'sanitize' => TRUE,
+    'langcode' => NULL,
+  );
+  $t_options = array(
+    'langcode' => $options['langcode'],
+  );
   $output = NULL;
   switch ($property) {
     case 'cid':
       return $country->cid;
 
     case 'enabled':
-      return empty($country->enabled) ? t('Disabled') : t('Enabled');
+      $t_options['context'] = 'countries';
+      return empty($country->enabled) ? t('Disabled', array(), $t_options) : t('Enabled', array(), $t_options);
 
     case 'continent_code':
       if (!empty($country->continent)) {
@@ -758,24 +790,25 @@ function country_property($country, $property, $default = NULL, $sanitize = TRUE
 
     case 'continent':
     case 'continent_name':
-      $continents = countries_get_continents();
+      $continents = countries_get_continents($t_options);
       if (!empty($country->continent) && !empty($continents[$country->continent])) {
         $output = $continents[$country->continent];
       }
-      elseif (!isset($default)) {
-        $output = t('Unknown');
+      elseif (!isset($options['default'])) {
+        $t_options['context'] = 'countries';
+        $output = t('Unknown', array(), $t_options);
       }
       break;
 
     case 'official_name':
-      if (!empty($country->official_name)) {
-        $output = $country->official_name;
-      }
-      elseif (!isset($default)) {
-        // Entity->label() returns an empty string if not set.
-        $output = $country->label();
-        if (!$output) {
-          $output = NULL;
+      // The function countries_t() returns an empty string if not set.
+      $output = countries_t($country, 'official_name', $options['langcode']);
+      if (!$output) {
+        if (isset($options['default'])) {
+          $output = $options['default'];
+        }
+        else {
+          $output = countries_t($country, 'name', $options['langcode']);
         }
       }
       break;
@@ -783,15 +816,16 @@ function country_property($country, $property, $default = NULL, $sanitize = TRUE
     case 'numcode':
       // We do not need to sanitize this output.
       if (!empty($country->numcode)) {
-        return theme('countries_number', array('country' => $country));
+        // @todo trace langcode into this function
+        return theme('countries_number', array('country' => $country, 'langcode' => $options['langcode']));
       }
       break;
 
     case 'name':
-      // Entity->label() returns an empty string if not set.
-      $output = $country->label();
-      if (!$output) {
-        $output = NULL;
+      // The function countries_t() returns an empty string if not set.
+      $output = countries_t($country, 'name', $options['langcode']);
+      if (!$output && isset($options['default'])) {
+        $output = $options['default'];
       }
       break;
 
@@ -802,9 +836,9 @@ function country_property($country, $property, $default = NULL, $sanitize = TRUE
 
   }
   if (!isset($output)) {
-    $output = isset($default) ? $default : '';
+    $output = isset($options['default']) ? $options['default'] : '';
   }
-  return $sanitize ? check_plain($output) : $output;
+  return $options['sanitize'] ? check_plain($output) : $output;
 }
 
 /**
@@ -844,14 +878,14 @@ function countries_country_lookup($value, $property = NULL) {
       $value = trim($value);
       break;
   }
-  foreach (countries_get_countries($property) as $iso2 => $country_value) {
+  foreach (countries_get_countries($property, array(), array('sanitize' => FALSE)) as $iso2 => $country_value) {
     if ($value == $country_value) {
       return country_load($iso2);
     }
   }
   // Try the official name too when doing name searches.
   if ($property == 'name') {
-    foreach (countries_get_countries('official_name') as $iso2 => $country_value) {
+    foreach (countries_get_countries('official_name', array(), array('sanitize' => FALSE)) as $iso2 => $country_value) {
       if ($value == $country_value) {
         return country_load($iso2);
       }
@@ -1005,7 +1039,7 @@ function countries_action_info() {
 }
 
 /**
- * Enable country action
+ * Enable country action.
  */
 function country_enable_action($country, $context = array()) {
   $country->enabled = 1;
@@ -1013,7 +1047,7 @@ function country_enable_action($country, $context = array()) {
 }
 
 /**
- * Disable country action
+ * Disable country action.
  */
 function country_disable_action($country, $context = array()) {
   $country->enabled = 0;
@@ -1061,7 +1095,7 @@ function countries_apachesolr_map_callback(array $values) {
   $map = array();
   foreach ($values as $value) {
     if ($country = country_load($value)) {
-      $map[$value] = countries_t($country, 'name');
+      $map[$value] = country_property($country, 'name', array('sanitize' => 0));
     }
   }
   return $map;
@@ -1089,7 +1123,8 @@ function countries_apachesolr_display_callback($facet, $options) {
   }
 
   if ($country) {
-    return check_plain(countries_t($country, 'name'));
+    // @todo Do we have language context here?
+    return country_property($country);
   }
   return '';
 }
