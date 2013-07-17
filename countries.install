@@ -108,10 +108,7 @@ function countries_install() {
   // Import the data.
   countries_import_csv();
   $t = get_t();
-  drupal_set_message($t('Visit the countries !config_page to import the most recent changes from the ISO 3166-1 standard.',
-    array(
-      '!config_page' => l($t('configuration page'), 'admin/config/regional/countries/import'),
-    )));
+  drupal_set_message($t('The list of countries has been updated to the latest definition from the ISO 3166. Enable the Countries Import module at any time to bulk update this list or to update this list with the Unicode Consortium CLDR that contains most countries in nearly all languages.'));
 }
 
 /**
@@ -121,19 +118,6 @@ function countries_uninstall() {
   variable_del('countries_continents');
   variable_del('countries_csv_datasource');
   variable_del('countries_admin_overview_columns');
-}
-
-
-/**
- * Helper function to inform users about available updates.
- */
-function countries_install_available_update_message($link) {
-  $t = get_t();
-  drupal_set_message($t('Visit the countries !config_page to import the most recent changes from the !link.',
-    array(
-      '!config_page' => l($t('configuration page'), 'admin/config/regional/countries/import'),
-      '!link' => $link,
-    )));
 }
 
 /**
@@ -310,20 +294,6 @@ function countries_update_7203() {
 }
 
 /**
- * Informs the user about the latest round of name changes.
- *
- * The name field is 100% in sync with the ISO standard with this release.
- */
-function countries_update_7205() {
-  $t = get_t();
-  $link = l($t('ISO Newsletter !version', array('!version' => 'VI-14')),
-    'http://www.iso.org/iso/iso_3166-1_newsletter_vi-14_name_change_state_of_palestine.pdf',
-    array('external' => 1));
-  countries_install_available_update_message($link);
-  cache_clear_all();
-}
-
-/**
  * Sets the language column.
  *
  * We have to guess the best language for this as the value may not match
@@ -341,3 +311,11 @@ function countries_update_7206() {
   )));
 }
 
+/**
+ * Rebuilds the menu.
+ *
+ * Import has been moved the the sub-module Countries Import.
+ */
+function countries_update_7207() {
+  variable_set('menu_rebuild_needed', 1);
+}

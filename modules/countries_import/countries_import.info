@@ -1,0 +1,12 @@
+name = Countries Import
+description = Integrates with external data sources to update the countries database and includes the internal ISO listing and CLDR online repository.
+package = Fields
+core = 7.x
+
+files[] = plugins/countries_import_manager.inc
+files[] = plugins/countries_import_core.inc
+files[] = plugins/countries_import_cldr.inc
+
+configure = admin/config/regional/countries/import
+
+dependencies[] = countries

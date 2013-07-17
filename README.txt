@@ -51,22 +51,18 @@ INSTALLATION
 Read more about installing modules at http://drupal.org/node/70151
 
 3.  Updating the core list
-    The module does not override the standard name that is defined by the core
-    Drupal country list during installation. If you want to bulk update all
-    standard names to those of ISO 3166-1, visit the bulk update page and select
-    the countries to update. Selecting all updates should bring the database in
-    sync with the ISO standard.
+    The module will override the standard name that is defined by the core
+    Drupal country list during installation to those of ISO 3166-1. 
     
-    The bulk update page is found here:
-    http://www.example.com/admin/config/regional/countries/import
+    You can either manually edit these to update or enable to the Countries
+    Import sub-module to bulk update directly from the Unicode Consortium CLDR
+    trunk repository (multilingual).
 
 UPGRADING
 ---------
 Any updates should be automatic. Just remember to run update.php!
 
-To reset your countries database with the ISO defined countries list, visit
-http://www.example.com/admin/config/regional/countries/import to manually
-select which country properties to update.
+Country names will be automatically updated from 16 July 2013.
 
 FEATURES
 --------
@@ -247,9 +243,20 @@ HOWTO / FAQ
 
 1 - Revert the database to the original values.
 
-To reset your countries database with the ISO defined countries list, visit
-http://www.example.com/admin/config/regional/countries/import to manually
-select which countries to update. Replace www.example.com with your sites URL.
+To reset your countries database with the ISO defined countries list, enable
+the Countries Import sub-module and visit the following page.
+
+http://www.example.com/admin/config/regional/countries/import
+
+Select the "Core ISO list" option. 
+
+Step 2 allows you to selectively choice what corrections that you want to
+include.
+
+You can also select the CLDR Repository which contains less formal and
+(sometimes) less politically charged names, although this is a matter of
+perspecitive! The CLDR Repository contains translations of most countries in
+most languages.
 
 2 - Change the continent list.
 

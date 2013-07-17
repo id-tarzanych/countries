@@ -78,16 +78,6 @@ function countries_menu() {
     'weight' => 1,
     'file' => 'countries.admin.inc',
   );
-  $items['admin/config/regional/countries/import'] = array(
-    'title' => 'Update countries',
-    'description' => 'Bulk import countries from the ISO standard.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('countries_admin_import_form'),
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_LOCAL_ACTION,
-    'weight' => 2,
-    'file' => 'countries.admin.inc',
-  );
   $items['admin/config/regional/countries/%country'] = array(
     'title callback' => 'countries_page_title',
     'title arguments' => array(4),
