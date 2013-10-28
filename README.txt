@@ -17,14 +17,14 @@ Features include:
  * A countries field.
  * Ability to add any additional Fields to a country.
  * Integration with Views, Token, Apache solr search and Feeds modules.
- * Numerious methods to handle and filter the data.
+ * Numerous methods to handle and filter the data.
  * A country FAPI element.
 
 Countries 7.x-2.x only
  * Entity API integration.
  * A countries field with continent filter.
  * New continent and continent code formatters
- * Integration with CountryIcons v2 with more features for less loc.
+ * Integration with CountryIcons v2 with more features for less LOC.
 
 New hooks for listening to country changes.
 * hook_country_insert()
@@ -77,7 +77,7 @@ America, Oceania, South America). An enabled flag defines a countries status.
 For example, Taiwan has the following values:
 
  * Name           - Australia
- * Offical name   - Commonwealth of Australia
+ * Official name   - Commonwealth of Australia
  * ISO alpha-2    - AU
  * ISO alpha-3    - AUS
  * ISO numeric-3  - 36
@@ -87,10 +87,10 @@ For example, Taiwan has the following values:
 The official names were originally taken from WikiPedia [2] and the majority of
 the continent information was imported from Country codes API project [3].
 
-This have been since standardised with the ISO 3166-1 standard. 
+This have been since standardized with the ISO 3166-1 standard. 
 
 Country updates are added when the ISO officially releases these. This process
-may be up to 2 - 6 months. South Sudans inclusion took around a month. Kosovo
+may be up to 2 - 6 months. South Sudan's inclusion took around a month. Kosovo
 is taking many months, but this should be added in the near future as Kosovo is
 a member both the IMF and World Bank.
 
@@ -255,7 +255,7 @@ include.
 
 You can also select the CLDR Repository which contains less formal and
 (sometimes) less politically charged names, although this is a matter of
-perspecitive! The CLDR Repository contains translations of most countries in
+perspective! The CLDR Repository contains translations of most countries in
 most languages.
 
 2 - Change the continent list.
@@ -336,7 +336,7 @@ The name, ISO alpha-2 and enabled columns can not be removed.
 
 4 - I18n support (Countries 7.x-2.x only)
 
-This is in the early implemenation stages using the Entity API integration.
+This is in the early implementation stages using the Entity API integration.
 
 5 - Why is the delete link hidden on some countries?
   - Why is the edit ISO alpha-2 code disabled on some countries?
@@ -346,118 +346,7 @@ countries that Drupal generates, these must be present in the database. Also
 done to ensure that existing references to these countries still exist, even if
 you can no longer select them when they are disabled.
 
-6 - How does this differ from countries_api?
-
-The countries_api is a just that, an API locked into a back-end country and
-regions database that has no configurable options. It main purpose is converting
-country code data from one format to another.
-
-From the Country codes API modules project page:
-
-    "Typical usage would be converting a country name to its ISO2
-    (or ISO3) country code."
-
-The Countries module is based on the philosophy that only the ISO2 code can be
-trusted. All other data can be modified by the sites administrator, and the ISO2
-is the primary key. Then the most common country requirements are built on top
-of this base, providing the input elements, etc.
-
-Function                           Drupal 6                Drupal 7
-Provide a list of countries        Countries API           Drupal
-Update the countries list          N/A                     Countries
-Provide a field element            CCK Country             Countries
-Country getter API                 Countries API           Countries
-
-
-Here is an approximate mapping of the Country API functions in the Countries
-module. Note that the Country API module generally returns an array, while the
-Countries module returns an object.
-
-Countries API module
---------------------------------------------------------------------------------
-<?php
-
-# 1 - All countries (an array of country arrays)
-$countries = countries_api_get_list();
-
-# 2 - Load a country (an array)
-$country = countries_api_get_country($iso2_or_iso3);
-$country = countries_api_iso2_get_country($iso2);
-$country = countries_api_iso3_get_country($iso3);
-$country = _countries_api_iso_get_country($property, $value);
-
-# 3 - Get a countries name
-$name = countries_api_get_name($iso2_or_iso3);
-$name = countries_api_iso2_get_name($iso2);
-$name = countries_api_iso3_get_name($iso3);
-
-# 4 - Toggle between ISO character codes
-$iso3 = countries_api_iso2_get_iso3($iso2);
-$iso2 = countries_api_iso3_get_iso2($code);
-
-# 5 - Option lists
-$list = countries_api_get_array($list_key_property, $list_option_property);
-$standard_list = countries_api_get_options_array();
-?>
---------------------------------------------------------------------------------
-
-Countries module
---------------------------------------------------------------------------------
-<?php
-# 1 - All countries (an array of country objects)
-$countries = countries_get_countries();
-
-# 2 - Load a country (an object)
-$country = country_load($iso2);
-$country = countries_country_lookup($value);
-$country = countries_country_lookup($value, $property);
-
-# 3 - Get a countries name
-Note that $country->label() is equivalent to $country->name unless you have
-an i18n site.
-
-// The recommended method for an existing country using ISO 2 code
-$name = country_load($iso2)->label();
-
-// If the ISO 2 code can not be trusted:
-$name = ($country = country_load($iso2) ? $country->label() : '');
-
-// Any property (iso2, iso3, num code or name) supplied by an end user
-$name = $country = countries_country_lookup($value) ? $country->label() : '';
-
-# 4 - Toggle between ISO character codes
-$iso3 = country_load($iso2)->iso3;
-$iso2 = $country = countries_country_lookup($iso3, 'iso3') ? $country->iso2 : '';
-
-# 5 - Option lists
-// If keyed by iso2 value.
-$list = countries_get_countries($list_option_property);
-
-// Other lists that are keyed differently would need to be generated manually.
-$list = array();
-foreach (countries_get_countries() as $country) {
-  $list[$country->numcode] = $country->label();
-}
-
-$standard_list = array('' => t('Please Choose')) + countries_get_countries('name');
-
-# Please note that the following are equivalent.
-
-  // Core Drupal iso2/name listing.
-  // Returns a list of countries passed through hook_countries_alter().
-  include_once DRUPAL_ROOT . '/includes/locale.inc';
-  $list = country_get_list();
-
-  // Countries module.
-  // Get a list of enabled countries and then allow other modules to update this
-  // list via hook_countries_alter(). This avoids loading 'include/locale.inc'.
-  $list = countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED));
-  countries_invoke_additional_countries_alter($list);
-
-?>
---------------------------------------------------------------------------------
-
-7 - Related modules (as of early 2010) see http://drupal.org/node/1412962
+6 - Related modules (as of early 2010) see http://drupal.org/node/1412962
 
 
 CHANGE LOG
@@ -473,7 +362,7 @@ Countries 7.x-1.x to 7.x-2.x
    Use country_load() instead.
 
 3) countries_get_countries() will throw an Exception if you attempt to
-   use it to lookup an invalid property (latter removed in 7.x-2.2).
+   use it to look up an invalid property (latter removed in 7.x-2.2).
 
 4) CRUD functions have been completely refactored.
 
