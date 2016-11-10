@@ -1,0 +1,5 @@
+entity.country.collection:
+  title: 'Countries'
+  description: 'List, edit, or add countries..'
+  parent: system.admin_config_regional
+  route_name: entity.country.collection

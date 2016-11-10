@@ -1,5 +1,0 @@
-name = Countries configuration
-description = A configuration utility module to assist storing country specific data.
-package = Fields
-version = VERSION
-core = 7.x

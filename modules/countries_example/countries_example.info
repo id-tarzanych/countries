@@ -1,8 +1,0 @@
-name = Countries Example
-description = "Countries example module"
-
-; Core version (required)
-core = 7.x
-package = Example modules
-
-dependencies[] = countries

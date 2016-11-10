@@ -1,0 +1,4 @@
+services:
+  countries.continent_manager:
+    class: Drupal\countries\ContinentManager
+    arguments: ['@module_handler']

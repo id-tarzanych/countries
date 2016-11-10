@@ -1,0 +1,4 @@
+entity.country.collection:
+  title: List
+  route_name: entity.country.collection
+  base_route: entity.country.collection

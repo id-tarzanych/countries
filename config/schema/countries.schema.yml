@@ -1,0 +1,36 @@
+countries.country.*:
+  type: config_entity
+  label: 'Country'
+  mapping:
+    iso2:
+      type: string
+      label: 'ISO2 code of country'
+    iso3:
+      type: string
+      label: 'ISO3 code of country'
+    name:
+      type: label
+      label: 'Country name'
+    official_name:
+      type: label
+      label: 'Official name of country'
+    continent:
+      type: string
+      label: 'Continent that country belongs to'
+    status:
+      type: boolean
+      label: 'Enabled status'
+    numcode:
+      type: integer
+      label: 'Official numcode of country'
+
+field.value.country:
+  type: mapping
+  label: 'Default value'
+  mapping:
+    iso2:
+      type: string
+      label: 'ISO2 code of country'
+    target_uuid:
+      type: string
+      label: 'Target UUID'

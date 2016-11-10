@@ -1,0 +1,19 @@
+name: Countries
+description: A module that provides a FAPI / Field country element and a simple wrapper module to store / update country data.
+package: Fields
+type: module
+core: 8.x
+
+recommends:
+  - countryicons
+
+#files[] = views/views_handler_argument_countries_country.inc
+#files[] = views/views_handler_field_countries_continent.inc
+#files[] = views/views_handler_field_countries.inc
+#files[] = views/views_handler_filter_countries_list.inc
+#files[] = countries.migrate.inc
+#files[] = tests/countries.test
+#
+#configure = admin/config/regional/countries
+#dependencies[] = entity
+#recommends[] = countryicons

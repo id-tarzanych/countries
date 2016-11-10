@@ -1,0 +1,5 @@
+countries.add_action:
+  route_name: entity.country.add
+  title: 'Add a country'
+  appears_on:
+    - entity.country.collection

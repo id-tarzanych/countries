@@ -1,0 +1,63 @@
+entity.country.collection:
+  path: '/admin/config/regional/countries'
+  defaults:
+    _entity_list: 'country'
+    _title: 'Countries'
+  requirements:
+    _permission: 'administer countries'
+
+entity.country.add:
+  path: 'admin/config/regional/countries/add'
+  defaults:
+    _entity_form: country.add
+    _title: 'Add a country'
+  requirements:
+    _permission: 'administer countries'
+
+entity.country.edit_form:
+  path: '/admin/config/regional/countries/{country}'
+  defaults:
+    _entity_form: country.edit
+    _title_callback: '\Drupal\countries\Controller\CountryController::editCountryTitle'
+  requirements:
+    _permission: 'administer countries'
+  options:
+    parameters:
+      country:
+        type: entity:country
+
+entity.country.delete_form:
+  path: '/admin/config/regional/countries/{country}/delete'
+  defaults:
+    _entity_form: country.delete
+    _title_callback: '\Drupal\countries\Controller\CountryController::deleteCountryTitle'
+  requirements:
+    _permission: 'administer countries'
+  options:
+    parameters:
+      country:
+        type: entity:country
+
+entity.country.disable:
+  path: '/admin/config/regional/countries/{country}/disable'
+  defaults:
+    _entity_form: 'country.disable'
+    _title: 'Disable country'
+  requirements:
+    _entity_access: 'country.disable'
+  options:
+    parameters:
+      country:
+        type: entity:country
+
+entity.country.enable:
+  path: '/admin/config/regional/countries/{country}/enable'
+  defaults:
+    _entity_form: 'country.enable'
+    _title: 'Enable country'
+  requirements:
+    _entity_access: 'country.enable'
+  options:
+    parameters:
+      country:
+        type: entity:country
