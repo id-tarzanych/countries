@@ -2,7 +2,7 @@
 
 namespace Drupal\countries\Entity;
 
-use Drupal\bootstrap\Utility\Unicode;
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
